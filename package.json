@@ -9,9 +9,11 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@better-auth/mongo-adapter": "^1.6.19",
     "@gravity-ui/icons": "^2.18.0",
     "@heroui/react": "^3.2.1",
     "@heroui/styles": "^3.2.1",
+    "better-auth": "^1.6.19",
     "framer-motion": "^12.40.0",
     "hamburger-react": "^2.5.2",
     "next": "16.2.9",
