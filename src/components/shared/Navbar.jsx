@@ -162,8 +162,6 @@ const Navbar = () => {
                 },
             });
         } catch (err) {
-            console.error("Logout error:", err);
-            toast.error("Something went wrong");
         }
     };
 
@@ -257,7 +255,7 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <>
-                                <Link href="/dashboard">
+                                <Link href={`dashboard/${user?.role}`}>
                                     <Button
                                         variant="bordered"
                                         radius="lg"
@@ -271,11 +269,12 @@ const Navbar = () => {
                                 <div className="w-px h-6 mx-3 bg-zinc-200 dark:bg-zinc-800" />
 
                                 <Link
-                                    href="/dashboard/profile"
+                                    href={`/dashboard/${user?.role}/profile`}
                                     className="flex items-center gap-2.5 pr-3 group"
                                 >
                                     <Avatar className="w-9 h-9 group-hover:ring-2 ring-blue-500/70 transition-all cursor-pointer">
                                         <Avatar.Image
+                                        className="object-cover"
                                             src={user?.image}
                                             alt={user?.name || "User"}
                                         />
@@ -342,7 +341,7 @@ const Navbar = () => {
                                 ...(!isLoading && user
                                     ? [
                                           {
-                                              path: "/dashboard",
+                                              path: `/dashboard/${user?.role}`,
                                               label: "Dashboard",
                                               icon: BarsUnaligned,
                                           },

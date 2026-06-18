@@ -65,8 +65,6 @@ const LoginPage = () => {
                 rememberMe,
             });
 
-            console.log("Login DATA:", data);
-            console.log("Login ERROR:", error);
 
             if (error) {
                 if (error.message?.includes("Invalid")) {
@@ -97,10 +95,12 @@ const LoginPage = () => {
                 },
             });
 
-            router.push(redirect);
             router.refresh();
+
+            setTimeout(() => {
+                window.location.href = redirect;
+            }, 500);
         } catch (err) {
-            console.error("Login error:", err);
             setError("Something went wrong. Please try again.");
             setLoading(false);
         }
