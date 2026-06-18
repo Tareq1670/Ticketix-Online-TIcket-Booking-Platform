@@ -18,6 +18,7 @@ import { IoTicketOutline } from "react-icons/io5";
 import { MdOutlineEventSeat } from "react-icons/md";
 import { HiOutlineTicket } from "react-icons/hi2";
 import { BsShieldLock, BsEnvelope } from "react-icons/bs";
+import { authClient } from "@/lib/auth-client";
 
 const validateStrongPassword = (value) => {
     if (!value || value.length < 8) {
@@ -53,37 +54,61 @@ const LoginPage = () => {
         setLoading(true);
 
         const formData = new FormData(e.currentTarget);
-        const loginData = Object.fromEntries(formData.entries());
+        const email = formData.get("email");
+        const password = formData.get("password");
+        const rememberMe = formData.get("remember") === "on";
 
-        // ===========================
-        // Temporary simulation only
-        // ===========================
-        setTimeout(() => {
-            setLoading(false);
-            console.log("Login Data:", loginData);
+        try {
+            const { data, error } = await authClient.signIn.email({
+                email,
+                password,
+                rememberMe,
+            });
 
-            toast.success("Welcome back to TicketHub!", {
+            console.log("Login DATA:", data);
+            console.log("Login ERROR:", error);
+
+            if (error) {
+                if (error.message?.includes("Invalid")) {
+                    setError("Invalid email or password. Please try again.");
+                } else if (error.message?.includes("not found")) {
+                    setError(
+                        "No account found with this email. Please register first.",
+                    );
+                } else {
+                    setError(
+                        error.message || "Login failed. Please try again.",
+                    );
+                }
+                setLoading(false);
+                return;
+            }
+
+            toast.success(`Welcome back, ${data?.user?.name || "User"}! 🎫`, {
                 duration: 2500,
                 position: "top-center",
-                icon: "🎫",
                 style: {
-                    background: "#fff7ed",
-                    color: "#9a3412",
+                    background:
+                        "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+                    color: "#065f46",
                     borderRadius: "12px",
-                    border: "1px solid #fdba74",
+                    border: "1px solid #6ee7b7",
                     fontWeight: "600",
                 },
             });
 
             router.push(redirect);
-        }, 1200);
+            router.refresh();
+        } catch (err) {
+            console.error("Login error:", err);
+            setError("Something went wrong. Please try again.");
+            setLoading(false);
+        }
     };
 
     const handleGoogleLogin = async () => {
-        console.log("Google Login triggered");
-        toast("Google sign in coming soon", {
-            icon: "🚀",
-            position: "top-center",
+        const data = authClient.signIn.social({
+            provider: "google",
         });
     };
 
@@ -225,7 +250,7 @@ const LoginPage = () => {
                                 />
 
                                 <Button
-                                variant="none"
+                                    variant="none"
                                     type="button"
                                     onClick={() =>
                                         setShowPassword(!showPassword)

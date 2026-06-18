@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Button, Avatar } from "@heroui/react";
+import { Button, Avatar, Skeleton } from "@heroui/react";
 import { useTheme } from "next-themes";
 import Hamburger from "hamburger-react";
 import { RiSunLine, RiMoonLine } from "react-icons/ri";
@@ -16,6 +16,89 @@ import {
     Ticket,
     LayoutHeaderCells,
 } from "@gravity-ui/icons";
+import { authClient, signOut } from "@/lib/auth-client";
+import toast from "react-hot-toast";
+
+const DesktopAuthSkeleton = () => {
+    return (
+        <div className="flex items-center gap-3">
+            <Skeleton
+                animationType="shimmer"
+                className="h-10 w-28 rounded-xl"
+            />
+
+            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+
+            <div className="flex items-center gap-2.5 pr-3 min-w-[160px]">
+                <Skeleton
+                    animationType="shimmer"
+                    className="h-9 w-9 shrink-0 rounded-full"
+                />
+                <div className="space-y-2">
+                    <Skeleton
+                        animationType="shimmer"
+                        className="h-3 w-24 rounded-lg"
+                    />
+                    <Skeleton
+                        animationType="shimmer"
+                        className="h-3 w-16 rounded-lg"
+                    />
+                </div>
+            </div>
+
+            <div className="w-px h-6 bg-zinc-200 dark:bg-zinc-800" />
+
+            <Skeleton
+                animationType="shimmer"
+                className="h-10 w-10 rounded-xl"
+            />
+        </div>
+    );
+};
+
+const MobileDashboardSkeleton = () => {
+    return (
+        <div className="flex items-center gap-3.5 px-4 py-3 rounded-xl">
+            <Skeleton
+                animationType="shimmer"
+                className="h-8 w-8 rounded-lg shrink-0"
+            />
+            <Skeleton animationType="shimmer" className="h-4 w-28 rounded-lg" />
+        </div>
+    );
+};
+
+const MobileAuthSkeleton = () => {
+    return (
+        <div className="space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/40">
+                <Skeleton
+                    animationType="shimmer"
+                    className="h-10 w-10 shrink-0 rounded-full"
+                />
+                <div className="flex-1 space-y-2">
+                    <Skeleton
+                        animationType="shimmer"
+                        className="h-3 w-32 rounded-lg"
+                    />
+                    <Skeleton
+                        animationType="shimmer"
+                        className="h-3 w-20 rounded-lg"
+                    />
+                </div>
+            </div>
+
+            <Skeleton
+                animationType="shimmer"
+                className="h-11 w-full rounded-xl"
+            />
+            <Skeleton
+                animationType="shimmer"
+                className="h-11 w-full rounded-xl"
+            />
+        </div>
+    );
+};
 
 const Navbar = () => {
     const pathname = usePathname();
@@ -25,10 +108,10 @@ const Navbar = () => {
     const [mounted, setMounted] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const { data, isPending, refetch } = authClient.useSession();
 
- 
-    const user = null;
-    const isLoading = false;
+    const user = data?.user;
+    const isLoading = isPending;
     const mobileMenuRef = useRef(null);
 
     useEffect(() => {
@@ -61,9 +144,27 @@ const Navbar = () => {
         setIsMobileMenuOpen(false);
     }, [pathname]);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setIsMobileMenuOpen(false);
-        router.push("/");
+
+        try {
+            await authClient.signOut({
+                fetchOptions: {
+                    onSuccess: async () => {
+                        await refetch?.(); // session state revalidate
+                        toast.success("Logged out successfully");
+                        router.replace("/");
+                        router.refresh();
+                    },
+                    onError: (ctx) => {
+                        toast.error(ctx.error.message || "Logout failed");
+                    },
+                },
+            });
+        } catch (err) {
+            console.error("Logout error:", err);
+            toast.error("Something went wrong");
+        }
     };
 
     const isDark = mounted && resolvedTheme === "dark";
@@ -78,7 +179,6 @@ const Navbar = () => {
         >
             <div className="container mx-auto px-2 md:px-0">
                 <div className="flex items-center justify-between h-16">
-                    {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group">
                         <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center shadow-lg shadow-green-500/20 group-hover:shadow-green-500/30 transition-shadow">
                             <Ticket className="text-white" size={22} />
@@ -91,7 +191,6 @@ const Navbar = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Nav Links */}
                     <div className="hidden lg:flex items-center gap-10">
                         {[
                             { path: "/", label: "Home" },
@@ -115,9 +214,7 @@ const Navbar = () => {
                         })}
                     </div>
 
-                    {/* Desktop Right Side */}
                     <div className="hidden lg:flex items-center h-10">
-                        {/* Theme Toggle */}
                         <Button
                             isIconOnly
                             variant="light"
@@ -140,7 +237,7 @@ const Navbar = () => {
                         <div className="w-px h-6 mx-3 bg-zinc-200 dark:bg-zinc-800" />
 
                         {isLoading ? (
-                            <div className="w-40 h-10 rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+                            <DesktopAuthSkeleton />
                         ) : !user ? (
                             <div className="flex items-center gap-4">
                                 <Link
@@ -212,7 +309,6 @@ const Navbar = () => {
                         )}
                     </div>
 
-                    {/* Mobile Hamburger */}
                     <div className="lg:hidden hamburger-btn flex items-center justify-center">
                         {mounted ? (
                             <Hamburger
@@ -229,14 +325,12 @@ const Navbar = () => {
                 </div>
             </div>
 
-            {/* Mobile Menu */}
             {isMobileMenuOpen && (
                 <div
                     ref={mobileMenuRef}
                     className="lg:hidden !bg-white dark:!bg-zinc-900 border-t border-zinc-200 dark:border-zinc-800 shadow-xl shadow-black/5 dark:shadow-black/20 relative z-50"
                 >
-                    <div className="container mx-auto px-2 md:px-0">
-                        {/* Navigation Links */}
+                    <div className="container mx-auto px-2 md:px-0 py-4">
                         <div className="space-y-1">
                             {[
                                 { path: "/", label: "Home", icon: House },
@@ -245,7 +339,7 @@ const Navbar = () => {
                                     label: "All Tickets",
                                     icon: Grip,
                                 },
-                                ...(user
+                                ...(!isLoading && user
                                     ? [
                                           {
                                               path: "/dashboard",
@@ -285,7 +379,8 @@ const Navbar = () => {
                                 );
                             })}
 
-                            {/* Theme Toggle */}
+                            {isLoading && <MobileDashboardSkeleton />}
+
                             <button
                                 onClick={() =>
                                     setTheme(
@@ -315,11 +410,11 @@ const Navbar = () => {
                             </button>
                         </div>
 
-                        {/* Divider */}
                         <div className="my-4 border-t border-zinc-100 dark:border-zinc-800" />
 
-                        {/* Auth Section */}
-                        {!user ? (
+                        {isLoading ? (
+                            <MobileAuthSkeleton />
+                        ) : !user ? (
                             <div className="grid grid-cols-2 gap-3">
                                 <Link href="/login" className="w-full">
                                     <Button

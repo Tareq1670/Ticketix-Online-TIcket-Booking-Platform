@@ -37,6 +37,8 @@ import {
 } from "react-icons/fi";
 import { RiStoreLine } from "react-icons/ri";
 import { HiSparkles } from "react-icons/hi2";
+import { imageUploader } from "@/lib/imageUpload";
+import { authClient } from "@/lib/auth-client";
 
 const validateStrongPassword = (value) => {
     if (!value || value.length < 8)
@@ -45,8 +47,7 @@ const validateStrongPassword = (value) => {
         return "Password must contain at least 1 uppercase letter";
     if (!/[a-z]/.test(value))
         return "Password must contain at least 1 lowercase letter";
-    if (!/[0-9]/.test(value))
-        return "Password must contain at least 1 number";
+    if (!/[0-9]/.test(value)) return "Password must contain at least 1 number";
     if (!/[^A-Za-z0-9]/.test(value))
         return "Password must contain at least 1 special character";
     return null;
@@ -75,7 +76,6 @@ const RegisterPage = () => {
     const [isDragging, setIsDragging] = useState(false);
     const [agreedTerms, setAgreedTerms] = useState(false);
 
-    // Form fields state
     const [formFields, setFormFields] = useState({
         name: "",
         email: "",
@@ -87,7 +87,6 @@ const RegisterPage = () => {
         setFormFields((prev) => ({ ...prev, [field]: value }));
     }, []);
 
-    // Password strength calculation
     const passwordStrength = useMemo(() => {
         const p = formFields.password;
         if (!p) return { score: 0, label: "", color: "" };
@@ -109,7 +108,6 @@ const RegisterPage = () => {
         return { score: s, ...configs[s] };
     }, [formFields.password]);
 
-    // Step validation
     const isStepValid = useCallback(
         (step) => {
             switch (step) {
@@ -199,45 +197,28 @@ const RegisterPage = () => {
         setError("");
         setLoading(true);
 
-        const registerData = {
-            name: formFields.name,
-            email: formFields.email,
-            password: formFields.password,
-            role: selectedRole,
-            image: imageFile,
-        };
+        try {
+            let imageURL = "";
+            if (imageFile) {
+                const uploadData = await imageUploader(imageFile);
+                imageURL = uploadData?.display_url || uploadData?.url || "";
+            }
 
-        // ===========================
-        // TODO: Replace with Better Auth
-        // ===========================
-        // try {
-        //     // 1. Upload image to Cloudinary/S3
-        //     let imageURL = "";
-        //     if (imageFile) {
-        //         const imgFormData = new FormData();
-        //         imgFormData.append("file", imageFile);
-        //         const uploadRes = await fetch("/api/upload", { method: "POST", body: imgFormData });
-        //         const uploadData = await uploadRes.json();
-        //         imageURL = uploadData.url;
-        //     }
-        //
-        //     // 2. Register with Better Auth
-        //     const { data, error } = await authClient.signUp.email({
-        //         email: registerData.email,
-        //         password: registerData.password,
-        //         name: registerData.name,
-        //         image: imageURL,
-        //         role: selectedRole,
-        //     });
-        //
-        //     if (error) { setError(error.message); setLoading(false); return; }
-        //     toast.success("Account created!"); router.push(redirect);
-        // } catch (err) { setError("Something went wrong."); setLoading(false); }
-        // ===========================
+            const { data, error } = await authClient.signUp.email({
+                email: formFields.email,
+                password: formFields.password,
+                name: formFields.name,
+                image: imageURL || undefined,
+                role: selectedRole,
+            });
 
-        setTimeout(() => {
-            setLoading(false);
-            console.log("Register Data:", registerData);
+            if (error) {
+                setError(
+                    error.message || "Registration failed. Please try again.",
+                );
+                setLoading(false);
+                return;
+            }
 
             toast.success(
                 `Welcome to Ticketix as ${selectedRole === "vendor" ? "a Vendor" : "a User"}! 🎉`,
@@ -256,29 +237,43 @@ const RegisterPage = () => {
                 },
             );
 
-            router.push(redirect);
-        }, 1800);
+            router.push(`/login?redirect=${encodeURIComponent(redirect)}`);
+        } catch (err) {
+            setError(err?.message || "Something went wrong. Please try again.");
+            setLoading(false);
+        }
     };
 
     const handleGoogleRegister = async () => {
-        toast("Google sign up coming soon", {
-            icon: "🚀",
-            position: "top-center",
-            style: { borderRadius: "12px" },
-        });
+        if (!selectedRole) {
+            toast.error("Please select a role first", {
+                position: "top-center",
+            });
+            return;
+        }
+
+        try {
+            document.cookie = `pending_role=${selectedRole}; path=/; max-age=600; SameSite=Lax`;
+
+            await new Promise((resolve) => setTimeout(resolve, 100));
+
+            await authClient.signIn.social({
+                provider: "google",
+                callbackURL: "/",
+            });
+        } catch (err) {
+            toast.error("Google sign-in failed");
+        }
     };
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 transition-colors duration-500 relative overflow-hidden">
-            {/* Animated Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                {/* Gradient Orbs */}
                 <div className="absolute -top-40 -left-40 w-80 h-80 bg-gradient-to-br from-green-300/25 to-emerald-400/20 dark:from-green-800/10 dark:to-emerald-900/10 rounded-full blur-3xl animate-pulse" />
                 <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-gradient-to-tl from-teal-300/20 to-green-400/15 dark:from-teal-900/10 dark:to-green-900/8 rounded-full blur-3xl" />
                 <div className="absolute top-1/3 right-1/4 w-64 h-64 bg-emerald-200/20 dark:bg-emerald-900/8 rounded-full blur-3xl animate-pulse delay-1000" />
                 <div className="absolute bottom-1/3 left-1/4 w-48 h-48 bg-green-300/15 dark:bg-green-900/8 rounded-full blur-2xl animate-pulse delay-500" />
 
-                {/* Floating Icons */}
                 <div className="absolute top-[10%] left-[6%] text-green-300/15 dark:text-green-700/10 animate-bounce duration-[3000ms]">
                     <IoTicketOutline size={55} />
                 </div>
@@ -295,22 +290,17 @@ const RegisterPage = () => {
                     <HiSparkles size={25} />
                 </div>
 
-                {/* Grid Pattern */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.02)_1px,transparent_1px)] bg-[size:60px_60px] dark:bg-[linear-gradient(rgba(16,185,129,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.015)_1px,transparent_1px)]" />
             </div>
 
-            {/* Main Card */}
             <div className="relative w-full max-w-xl z-10">
-                {/* Glow Effect */}
                 <div className="absolute -inset-1.5 bg-gradient-to-r from-green-400/15 via-emerald-400/15 to-teal-400/15 dark:from-green-600/8 dark:via-emerald-600/8 dark:to-teal-600/8 rounded-3xl blur-2xl" />
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-green-400/10 via-emerald-400/10 to-teal-400/10 dark:from-green-600/5 dark:via-emerald-600/5 dark:to-teal-600/5 rounded-3xl blur-md" />
 
                 <div className="relative bg-white/80 dark:bg-zinc-900/80 backdrop-blur-2xl border border-green-100/80 dark:border-zinc-800/80 rounded-3xl shadow-2xl shadow-green-900/5 dark:shadow-black/30 overflow-hidden">
-                    {/* Top Accent Bar */}
                     <div className="h-1 w-full bg-gradient-to-r from-green-400 via-emerald-500 to-teal-500" />
 
                     <div className="p-8 md:p-10">
-                        {/* Header */}
                         <div className="text-center mb-8">
                             <div className="relative inline-flex items-center justify-center w-18 h-18 mb-4">
                                 <div className="absolute inset-0 bg-gradient-to-br from-green-400 to-emerald-600 rounded-2xl rotate-6 opacity-20" />
@@ -330,7 +320,6 @@ const RegisterPage = () => {
                             </p>
                         </div>
 
-                        {/* Step Indicator */}
                         <div className="flex items-center justify-center gap-0 mb-8">
                             {STEPS.map((step, index) => (
                                 <div
@@ -384,7 +373,6 @@ const RegisterPage = () => {
                             ))}
                         </div>
 
-                        {/* Progress Bar */}
                         <div className="w-full h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full mb-8 overflow-hidden">
                             <div
                                 className="h-full bg-gradient-to-r from-green-400 to-emerald-500 rounded-full transition-all duration-700 ease-out"
@@ -394,7 +382,6 @@ const RegisterPage = () => {
                             />
                         </div>
 
-                        {/* Error */}
                         {error && (
                             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/15 border border-red-200 dark:border-red-800/40 rounded-2xl text-sm text-red-600 dark:text-red-400 flex items-center gap-2.5 animate-in slide-in-from-top-2">
                                 <svg
@@ -412,9 +399,6 @@ const RegisterPage = () => {
                             </div>
                         )}
 
-                        {/* ==================== */}
-                        {/* STEP 1: Role Select  */}
-                        {/* ==================== */}
                         {currentStep === 1 && (
                             <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-400">
                                 <div className="text-center mb-2">
@@ -427,12 +411,9 @@ const RegisterPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    {/* User Card */}
                                     <button
                                         type="button"
-                                        onClick={() =>
-                                            setSelectedRole("user")
-                                        }
+                                        onClick={() => setSelectedRole("user")}
                                         className={`relative flex flex-col items-center gap-3 p-6 rounded-2xl border-2 transition-all duration-400 cursor-pointer group overflow-hidden ${
                                             selectedRole === "user"
                                                 ? "border-green-500 bg-gradient-to-b from-green-50/90 to-emerald-50/50 dark:from-green-900/20 dark:to-emerald-900/10 shadow-lg shadow-green-500/15 scale-[1.02]"
@@ -448,7 +429,6 @@ const RegisterPage = () => {
                                             </div>
                                         )}
 
-                                        {/* Decorative bg */}
                                         <div
                                             className={`absolute -bottom-6 -right-6 w-24 h-24 rounded-full transition-opacity ${
                                                 selectedRole === "user"
@@ -484,7 +464,6 @@ const RegisterPage = () => {
                                         </div>
                                     </button>
 
-                                    {/* Vendor Card */}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -541,7 +520,6 @@ const RegisterPage = () => {
                                     </button>
                                 </div>
 
-                                {/* Next Button */}
                                 <Button
                                     type="button"
                                     onClick={nextStep}
@@ -552,7 +530,6 @@ const RegisterPage = () => {
                                     <BsArrowRight size={16} />
                                 </Button>
 
-                                {/* Divider */}
                                 <div className="relative flex items-center justify-center">
                                     <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
                                     <span className="mx-4 text-zinc-400 dark:text-zinc-500 text-xs font-medium uppercase tracking-widest">
@@ -561,9 +538,9 @@ const RegisterPage = () => {
                                     <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
                                 </div>
 
-                                {/* Google */}
                                 <Button
                                     type="button"
+                                    isDisabled={!selectedRole}
                                     onClick={handleGoogleRegister}
                                     variant="flat"
                                     className="w-full rounded-2xl bg-zinc-100 dark:bg-zinc-800/70 text-zinc-700 dark:text-zinc-300 font-medium py-3 hover:bg-green-50 dark:hover:bg-zinc-700/70 transition-all duration-200 flex items-center justify-center gap-3 border border-zinc-200/60 dark:border-zinc-700/40 active:scale-[0.98]"
@@ -574,12 +551,8 @@ const RegisterPage = () => {
                             </div>
                         )}
 
-                        {/* ======================== */}
-                        {/* STEP 2: Profile Details  */}
-                        {/* ======================== */}
                         {currentStep === 2 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-400">
-                                {/* Avatar Upload */}
                                 <div className="flex flex-col items-center mb-2">
                                     <div className="relative group">
                                         {imagePreview ? (
@@ -669,7 +642,6 @@ const RegisterPage = () => {
                                     )}
                                 </div>
 
-                                {/* Name Field */}
                                 <TextField
                                     isRequired
                                     name="name"
@@ -680,10 +652,7 @@ const RegisterPage = () => {
                                         updateField("name", value)
                                     }
                                     validate={(value) => {
-                                        if (
-                                            !value ||
-                                            value.trim().length < 2
-                                        )
+                                        if (!value || value.trim().length < 2)
                                             return "Name must be at least 2 characters";
                                         if (value.trim().length > 50)
                                             return "Name must be less than 50 characters";
@@ -706,7 +675,6 @@ const RegisterPage = () => {
                                     <FieldError className="text-xs text-red-500 mt-1.5" />
                                 </TextField>
 
-                                {/* Email Field */}
                                 <TextField
                                     isRequired
                                     name="email"
@@ -742,7 +710,6 @@ const RegisterPage = () => {
                                     <FieldError className="text-xs text-red-500 mt-1.5" />
                                 </TextField>
 
-                                {/* Navigation */}
                                 <div className="flex gap-3 pt-2">
                                     <Button
                                         type="button"
@@ -766,15 +733,11 @@ const RegisterPage = () => {
                             </div>
                         )}
 
-                        {/* ===================== */}
-                        {/* STEP 3: Security      */}
-                        {/* ===================== */}
                         {currentStep === 3 && (
                             <Form
                                 onSubmit={handleRegister}
                                 className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-400"
                             >
-                                {/* Password */}
                                 <TextField
                                     isRequired
                                     minLength={8}
@@ -815,7 +778,6 @@ const RegisterPage = () => {
                                         </Button>
                                     </div>
 
-                                    {/* Strength Bar */}
                                     {formFields.password && (
                                         <div className="mt-2.5 space-y-1.5">
                                             <div className="flex gap-1">
@@ -848,7 +810,6 @@ const RegisterPage = () => {
                                         </div>
                                     )}
 
-                                    {/* Requirements Checklist */}
                                     {formFields.password && (
                                         <div className="mt-3 grid grid-cols-2 gap-1.5">
                                             {[
@@ -915,7 +876,6 @@ const RegisterPage = () => {
                                     <FieldError className="text-xs text-red-500 mt-1.5" />
                                 </TextField>
 
-                                {/* Confirm Password */}
                                 <TextField
                                     isRequired
                                     name="confirmPassword"
@@ -967,7 +927,6 @@ const RegisterPage = () => {
                                         </Button>
                                     </div>
 
-                                    {/* Match Indicator */}
                                     {formFields.confirmPassword && (
                                         <div className="flex items-center gap-1.5 mt-1.5">
                                             {formFields.confirmPassword ===
@@ -999,7 +958,6 @@ const RegisterPage = () => {
                                     <FieldError className="text-xs text-red-500 mt-1.5" />
                                 </TextField>
 
-                                {/* Terms */}
                                 <div className="flex items-start gap-3 p-4 rounded-xl bg-zinc-50/70 dark:bg-zinc-800/40 border border-zinc-200/50 dark:border-zinc-700/30">
                                     <input
                                         type="checkbox"
@@ -1032,7 +990,6 @@ const RegisterPage = () => {
                                     </label>
                                 </div>
 
-                                {/* Summary Card */}
                                 <div className="p-4 rounded-xl bg-gradient-to-r from-green-50/80 to-emerald-50/50 dark:from-green-900/15 dark:to-emerald-900/10 border border-green-200/50 dark:border-green-800/30">
                                     <p className="text-xs font-semibold text-green-700 dark:text-green-400 mb-2 flex items-center gap-1.5">
                                         <HiSparkles size={14} />
@@ -1070,7 +1027,6 @@ const RegisterPage = () => {
                                     </div>
                                 </div>
 
-                                {/* Navigation */}
                                 <div className="flex gap-3 pt-1">
                                     <Button
                                         type="button"
@@ -1123,7 +1079,6 @@ const RegisterPage = () => {
                             </Form>
                         )}
 
-                        {/* Login Link */}
                         <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-8">
                             Already have an account?{" "}
                             <Link
