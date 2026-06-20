@@ -22,7 +22,7 @@ import {
     MdTrain,
     MdDirectionsBoat,
 } from "react-icons/md";
-// import { toggleAdvertise } from "@/lib/actions/advertise";
+import { toggleAdvertise } from "@/lib/actions/advertise";
 
 // ─── Helpers ───
 const normalizeImageUrl = (url) => {

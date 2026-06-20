@@ -10,3 +10,18 @@ export const updateFraudStatus = async (userId, isFraud) => {
 };
 
 
+export const approveTicket = async (ticketId) => {
+    return serverMutation(
+        `/api/admin/tickets/${ticketId}/approve`,
+        {},
+        "PATCH"
+    );
+};
+
+export const rejectTicket = async (ticketId) => {
+    return serverMutation(
+        `/api/admin/tickets/${ticketId}/reject`,
+        {},
+        "PATCH"
+    );
+};
