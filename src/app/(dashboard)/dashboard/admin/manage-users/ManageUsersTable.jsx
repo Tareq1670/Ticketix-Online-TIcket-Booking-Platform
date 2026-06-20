@@ -684,7 +684,7 @@ const ManageUsersTable = ({
                 <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div>
                         <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-md">
-                            <FaTicketAlt /> TicketBari Admin Dashboard
+                            <FaTicketAlt /> Ticketix Admin Dashboard
                         </div>
                         <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
                             Manage Users

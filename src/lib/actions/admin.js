@@ -8,3 +8,5 @@ export const updateRole = async(userId, role) => {
 export const updateFraudStatus = async (userId, isFraud) => {
     return serverMutation(`/api/users/${userId}/fraud`, { isFraud }, "PATCH");
 };
+
+
