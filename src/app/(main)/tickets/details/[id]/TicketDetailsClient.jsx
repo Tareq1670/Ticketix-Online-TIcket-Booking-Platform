@@ -194,7 +194,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                 toast.success("Booking sent! Status: Pending");
                 setIsBooked(true);
                 setIsOpen(false);
-                router.push("/dashboard/user/my-booked-tickets");
+                router.push("/dashboard/user/my-bookings");
             } else {
                 toast.error(data?.message || "Booking failed");
             }
