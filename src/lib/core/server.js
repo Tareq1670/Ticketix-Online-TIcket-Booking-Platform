@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 
 const baseUrl = process.env.NEXT_PUBLIC_URL
 

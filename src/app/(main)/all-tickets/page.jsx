@@ -23,8 +23,7 @@ const AllTicketsPage = async ({ searchParams }) => {
 
     if (filters?.from) query.set("from", filters.from);
     if (filters?.to) query.set("to", filters.to);
-    if (filters?.transportType)
-        query.set("transportType", filters.transportType);
+    if (filters?.transportType) query.set("transportType", filters.transportType);
     if (filters?.sort) query.set("sort", filters.sort);
     if (filters?.page) query.set("page", filters.page);
     query.set("limit", "6");
@@ -81,8 +80,6 @@ const AllTicketsPage = async ({ searchParams }) => {
             </div>
 
             <div className="container relative z-10 mx-auto px-4 md:px-0 mb-5 md:mb-10">
-            
-
                 <TicketsFilter filters={filters} />
 
                 <div className="mb-6 mt-8 flex items-center justify-between border-b border-zinc-100 pb-4 dark:border-zinc-800">
@@ -109,11 +106,10 @@ const AllTicketsPage = async ({ searchParams }) => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {tickets.map((ticket, index) => (
+                        {tickets.map((ticket) => (
                             <CardTickets
                                 key={ticket._id}
                                 ticket={ticket}
-                                index={index}
                             />
                         ))}
                     </div>

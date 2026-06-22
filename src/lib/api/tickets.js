@@ -15,3 +15,10 @@ export const getSingleTickets = async(ticketId) =>{
 export const approvedTickets = async(queryParams) => {
     return serverDataFetch(`/api/users/all-tickets?${queryParams}`);
 }
+
+
+export const getTicketById = async(id) => {
+    return serverDataFetch(`/api/tickets/${id}`, {
+        cache: "no-store",
+    })
+}

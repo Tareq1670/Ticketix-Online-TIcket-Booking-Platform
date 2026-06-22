@@ -2,6 +2,8 @@
 
 import { Pagination } from "@heroui/react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { motion, useInView } from "framer-motion";
+import { useRef } from "react";
 
 const TicketsPagination = ({
     currentPage,
@@ -11,6 +13,8 @@ const TicketsPagination = ({
 }) => {
     const router = useRouter();
     const searchParams = useSearchParams();
+    const ref = useRef(null);
+    const inView = useInView(ref, { once: true, margin: "-60px" });
 
     const setPage = (newPage) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -44,50 +48,72 @@ const TicketsPagination = ({
     if (totalPages <= 1) return null;
 
     return (
-        <div className="mt-10 flex justify-center">
-            <Pagination>
-                <Pagination.Summary>
-                    Showing {startItem}-{endItem} of {totalItems} results
-                </Pagination.Summary>
-                <Pagination.Content>
-                    <Pagination.Item>
-                        <Pagination.Previous
-                            isDisabled={currentPage === 1}
-                            onPress={() => setPage(currentPage - 1)}
+        <div ref={ref} className="mt-10 flex justify-center">
+            <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+                <Pagination>
+                    <Pagination.Summary>
+                        Showing {startItem}-{endItem} of {totalItems} results
+                    </Pagination.Summary>
+                    <Pagination.Content>
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                         >
-                            <Pagination.PreviousIcon />
-                            <span>Previous</span>
-                        </Pagination.Previous>
-                    </Pagination.Item>
-
-                    {getPageNumbers().map((p, i) =>
-                        p === "ellipsis" ? (
-                            <Pagination.Item key={`ellipsis-${i}`}>
-                                <Pagination.Ellipsis />
-                            </Pagination.Item>
-                        ) : (
-                            <Pagination.Item key={p}>
-                                <Pagination.Link
-                                    isActive={p === currentPage}
-                                    onPress={() => setPage(p)}
+                            <Pagination.Item>
+                                <Pagination.Previous
+                                    isDisabled={currentPage === 1}
+                                    onPress={() => setPage(currentPage - 1)}
                                 >
-                                    {p}
-                                </Pagination.Link>
+                                    <Pagination.PreviousIcon />
+                                    <span>Previous</span>
+                                </Pagination.Previous>
                             </Pagination.Item>
-                        ),
-                    )}
+                        </motion.div>
 
-                    <Pagination.Item>
-                        <Pagination.Next
-                            isDisabled={currentPage === totalPages}
-                            onPress={() => setPage(currentPage + 1)}
+                        {getPageNumbers().map((p, i) =>
+                            p === "ellipsis" ? (
+                                <Pagination.Item key={`ellipsis-${i}`}>
+                                    <Pagination.Ellipsis />
+                                </Pagination.Item>
+                            ) : (
+                                <motion.div
+                                    key={p}
+                                    whileHover={{ scale: 1.06 }}
+                                    whileTap={{ scale: 0.96 }}
+                                >
+                                    <Pagination.Item>
+                                        <Pagination.Link
+                                            isActive={p === currentPage}
+                                            onPress={() => setPage(p)}
+                                        >
+                                            {p}
+                                        </Pagination.Link>
+                                    </Pagination.Item>
+                                </motion.div>
+                            )
+                        )}
+
+                        <motion.div
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
                         >
-                            <span>Next</span>
-                            <Pagination.NextIcon />
-                        </Pagination.Next>
-                    </Pagination.Item>
-                </Pagination.Content>
-            </Pagination>
+                            <Pagination.Item>
+                                <Pagination.Next
+                                    isDisabled={currentPage === totalPages}
+                                    onPress={() => setPage(currentPage + 1)}
+                                >
+                                    <span>Next</span>
+                                    <Pagination.NextIcon />
+                                </Pagination.Next>
+                            </Pagination.Item>
+                        </motion.div>
+                    </Pagination.Content>
+                </Pagination>
+            </motion.div>
         </div>
     );
 };

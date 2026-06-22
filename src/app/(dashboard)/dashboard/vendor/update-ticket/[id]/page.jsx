@@ -6,7 +6,6 @@ import { getSingleTickets } from "@/lib/api/tickets";
 const UpdateTicketPage = async ({ params }) => {
     const {id} = await params;
     const user = await getUser();
-    console.log(id);
 
     if (!user) {
         redirect("/login");

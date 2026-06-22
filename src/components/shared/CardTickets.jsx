@@ -156,7 +156,7 @@ const CardTickets = ({ ticket, index = 0 }) => {
 
                 <div className="mt-auto pt-5">
                     <Link
-                        href={`/tickets/${id}`}
+                        href={`/tickets/details/${id}`}
                         className="group/btn flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300  active:scale-[0.98]"
                     >
                         See Details
