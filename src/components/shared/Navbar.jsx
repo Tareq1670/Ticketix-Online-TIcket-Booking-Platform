@@ -255,7 +255,7 @@ const Navbar = () => {
                             </div>
                         ) : (
                             <>
-                                <Link href={`dashboard/${user?.role}/profile`}>
+                                <Link href={`/dashboard/${user?.role}/profile`}>
                                     <Button
                                         variant="bordered"
                                         radius="lg"
