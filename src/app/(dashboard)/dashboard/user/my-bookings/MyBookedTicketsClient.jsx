@@ -11,7 +11,7 @@ import {
     MdDirectionsBoat,
     MdOutlineAirplanemodeActive,
 } from "react-icons/md";
-import { FaTicketAlt } from "react-icons/fa";
+import { FaTicketAlt, FaPlaneDeparture } from "react-icons/fa";
 import {
     FiAlertTriangle,
     FiCalendar,
@@ -26,6 +26,7 @@ import {
 } from "react-icons/fi";
 import { AiFillClockCircle, AiFillCloseCircle } from "react-icons/ai";
 import { BsFillTicketDetailedFill } from "react-icons/bs";
+import { HiSparkles } from "react-icons/hi";
 import { Button } from "@heroui/react";
 import { cancelBooking } from "@/lib/actions/booking";
 
@@ -146,6 +147,48 @@ const modalVariants = {
     exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } },
 };
 
+const TimeBox = ({ value, label, colorScheme = "blue" }) => {
+    const colors = {
+        blue: {
+            box: "bg-white dark:bg-[#07111F] border-blue-200 dark:border-blue-900",
+            text: "text-[#064E3B] dark:text-blue-400",
+            label: "text-gray-500 dark:text-gray-400",
+        },
+        emerald: {
+            box: "bg-white dark:bg-[#07111F] border-emerald-200 dark:border-emerald-900",
+            text: "text-[#064E3B] dark:text-emerald-400",
+            label: "text-gray-500 dark:text-gray-400",
+        },
+        purple: {
+            box: "bg-white dark:bg-[#07111F] border-purple-200 dark:border-purple-900",
+            text: "text-purple-700 dark:text-purple-400",
+            label: "text-gray-500 dark:text-gray-400",
+        },
+    };
+    const c = colors[colorScheme];
+    return (
+        <div className="flex flex-col items-center">
+            <div className={`${c.box} border rounded-lg px-2 py-1 min-w-[38px] text-center shadow-sm overflow-hidden`}>
+                <AnimatePresence mode="popLayout">
+                    <motion.span
+                        key={value}
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 20, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className={`text-sm font-black ${c.text} font-mono inline-block`}
+                    >
+                        {String(value).padStart(2, "0")}
+                    </motion.span>
+                </AnimatePresence>
+            </div>
+            <span className={`text-[8px] ${c.label} uppercase tracking-wider mt-1 font-bold`}>
+                {label}
+            </span>
+        </div>
+    );
+};
+
 const StatusMessageCard = ({ status }) => {
     const isRejected = String(status).toLowerCase() === "rejected";
     const isCancelled = String(status).toLowerCase() === "cancelled";
@@ -186,7 +229,7 @@ const StatusMessageCard = ({ status }) => {
             initial={{ opacity: 0, scale: 0.9, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 150, damping: 18 }}
-            className={`bg-gradient-to-br ${config.gradient} border ${config.border} rounded-xl px-4 py-4 flex items-center gap-3`}
+            className={`bg-gradient-to-br ${config.gradient} border ${config.border} rounded-xl px-3 py-3 flex items-center gap-3`}
         >
             <motion.div
                 animate={
@@ -199,21 +242,132 @@ const StatusMessageCard = ({ status }) => {
                     repeat: Infinity,
                     repeatDelay: isRejected ? 3 : 1,
                 }}
-                className={`flex-shrink-0 w-12 h-12 rounded-2xl ${config.iconBg} ${config.iconColor} flex items-center justify-center shadow-md`}
+                className={`flex-shrink-0 w-10 h-10 rounded-xl ${config.iconBg} ${config.iconColor} flex items-center justify-center shadow-md`}
             >
-                <Icon className="text-2xl" />
+                <Icon className="text-xl" />
             </motion.div>
             <div className="flex-1 min-w-0">
                 <p
-                    className={`text-sm font-black ${config.titleColor} uppercase tracking-wide`}
+                    className={`text-xs font-black ${config.titleColor} uppercase tracking-wide`}
                 >
                     {config.title}
                 </p>
                 <p
-                    className={`text-xs font-semibold mt-0.5 ${config.textColor} leading-relaxed`}
+                    className={`text-[11px] font-semibold mt-0.5 ${config.textColor} leading-relaxed`}
                 >
                     {config.message}
                 </p>
+            </div>
+        </motion.div>
+    );
+};
+
+const PaidJourneyCard = ({ departureDate }) => {
+    const [timeLeft, setTimeLeft] = useState({
+        d: 0,
+        h: 0,
+        m: 0,
+        s: 0,
+        expired: false,
+        loading: true,
+    });
+
+    useEffect(() => {
+        const update = () => {
+            const diff = new Date(departureDate) - new Date();
+            if (diff <= 0) {
+                setTimeLeft({ expired: true, loading: false });
+                return;
+            }
+            setTimeLeft({
+                d: Math.floor(diff / 86400000),
+                h: Math.floor((diff % 86400000) / 3600000),
+                m: Math.floor((diff % 3600000) / 60000),
+                s: Math.floor((diff % 60000) / 1000),
+                expired: false,
+                loading: false,
+            });
+        };
+        update();
+        const timer = setInterval(update, 1000);
+        return () => clearInterval(timer);
+    }, [departureDate]);
+
+    const journeyDate = new Date(departureDate).toLocaleDateString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+    });
+    const journeyTime = new Date(departureDate).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+    if (timeLeft.loading) {
+        return (
+            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl px-3 py-3 flex items-center justify-center gap-2">
+                <FiClock className="text-emerald-500 animate-spin text-sm" />
+                <span className="text-xs font-bold text-emerald-500">
+                    Loading...
+                </span>
+            </div>
+        );
+    }
+
+    if (timeLeft.expired) {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4 }}
+                className="bg-gradient-to-r from-purple-50 to-fuchsia-50 dark:from-purple-950/30 dark:to-fuchsia-950/30 border border-purple-200 dark:border-purple-900 rounded-xl px-3 py-3"
+            >
+                <p className="text-center text-[9px] font-black text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-2">
+                    Journey Completed
+                </p>
+                <div className="flex items-center justify-center gap-2">
+                    <motion.div
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                    >
+                        <HiSparkles className="text-purple-600 dark:text-purple-400 text-base" />
+                    </motion.div>
+                    <span className="text-xs font-black text-purple-700 dark:text-purple-300">
+                        Hope you had a wonderful trip! ✨
+                    </span>
+                </div>
+            </motion.div>
+        );
+    }
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-200 dark:border-emerald-900 rounded-xl px-3 py-3"
+        >
+            <p className="text-center text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">
+                Journey Starts • {journeyDate} • {journeyTime}
+            </p>
+            <div className="flex items-center justify-center gap-1.5">
+                <motion.div
+                    animate={{ x: [0, 2, 0] }}
+                    transition={{
+                        duration: 2.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                >
+                    <FaPlaneDeparture className="text-emerald-600 dark:text-emerald-400 text-sm mr-1" />
+                </motion.div>
+                <TimeBox value={timeLeft.d} label="Days" colorScheme="emerald" />
+                <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
+                <TimeBox value={timeLeft.h} label="Hrs" colorScheme="emerald" />
+                <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
+                <TimeBox value={timeLeft.m} label="Min" colorScheme="emerald" />
+                <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
+                <TimeBox value={timeLeft.s} label="Sec" colorScheme="emerald" />
             </div>
         </motion.div>
     );
@@ -255,9 +409,9 @@ const CountdownTimer = ({ departureDate, status }) => {
 
     if (timeLeft.loading) {
         return (
-            <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-50 border border-gray-200 dark:bg-gray-900/30 dark:border-gray-800">
-                <FiClock className="text-gray-400 animate-spin text-sm" />
-                <span className="text-xs font-bold text-gray-400">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-900 rounded-xl px-3 py-3 flex items-center justify-center gap-2">
+                <FiClock className="text-blue-500 animate-spin text-sm" />
+                <span className="text-xs font-bold text-blue-500">
                     Loading...
                 </span>
             </div>
@@ -269,37 +423,15 @@ const CountdownTimer = ({ departureDate, status }) => {
             <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 dark:bg-red-950/30 dark:border-red-900 dark:text-red-400"
+                className="bg-red-50 border border-red-200 dark:bg-red-950/30 dark:border-red-900 rounded-xl px-3 py-3 flex items-center justify-center gap-2"
             >
-                <FiAlertTriangle className="text-sm animate-pulse" />
-                <span className="text-xs font-black tracking-wider uppercase">
+                <FiAlertTriangle className="text-red-600 dark:text-red-400 text-sm animate-pulse" />
+                <span className="text-xs font-black text-red-700 dark:text-red-400 tracking-wider uppercase">
                     Departed
                 </span>
             </motion.div>
         );
     }
-
-    const TimeBox = ({ value, label }) => (
-        <div className="flex flex-col items-center">
-            <div className="bg-white dark:bg-[#07111F] border border-emerald-200 dark:border-emerald-900 rounded-lg px-2 py-1 min-w-[38px] text-center shadow-sm overflow-hidden">
-                <AnimatePresence mode="popLayout">
-                    <motion.span
-                        key={value}
-                        initial={{ y: -20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 20, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: "easeOut" }}
-                        className="text-sm font-black text-[#064E3B] dark:text-emerald-400 font-mono inline-block"
-                    >
-                        {String(value).padStart(2, "0")}
-                    </motion.span>
-                </AnimatePresence>
-            </div>
-            <span className="text-[8px] text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1 font-bold">
-                {label}
-            </span>
-        </div>
-    );
 
     return (
         <motion.div
@@ -313,13 +445,13 @@ const CountdownTimer = ({ departureDate, status }) => {
             </p>
             <div className="flex items-center justify-center gap-1.5">
                 <FiClock className="text-blue-600 dark:text-blue-400 text-sm mr-1" />
-                <TimeBox value={timeLeft.d} label="Days" />
+                <TimeBox value={timeLeft.d} label="Days" colorScheme="blue" />
                 <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
-                <TimeBox value={timeLeft.h} label="Hrs" />
+                <TimeBox value={timeLeft.h} label="Hrs" colorScheme="blue" />
                 <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
-                <TimeBox value={timeLeft.m} label="Min" />
+                <TimeBox value={timeLeft.m} label="Min" colorScheme="blue" />
                 <span className="text-gray-400 font-bold mb-3 text-lg">:</span>
-                <TimeBox value={timeLeft.s} label="Sec" />
+                <TimeBox value={timeLeft.s} label="Sec" colorScheme="blue" />
             </div>
         </motion.div>
     );
@@ -342,6 +474,11 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
     const StatusIcon = statusConfig.icon;
     const status = String(booking.status).toLowerCase();
     const isInactive = status === "rejected" || status === "cancelled";
+    const isPaid = status === "paid";
+
+    const showStatusMessage = isInactive;
+    const showPaidJourney = isPaid;
+    const showCountdown = !["rejected", "cancelled", "paid"].includes(status);
 
     return (
         <motion.div
@@ -351,9 +488,9 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
             animate="visible"
             exit="exit"
             whileHover={{ y: -8, transition: { duration: 0.3 } }}
-            className="group relative bg-white dark:bg-[#0A1626] rounded-[24px] overflow-hidden border border-emerald-100 dark:border-emerald-900/50 shadow-[0_18px_50px_rgba(6,78,59,0.08)] hover:shadow-[0_26px_80px_rgba(6,78,59,0.16)] transition-shadow duration-300 flex flex-col"
+            className="group relative bg-white dark:bg-[#0A1626] rounded-[24px] overflow-hidden border border-emerald-100 dark:border-emerald-900/50 shadow-[0_18px_50px_rgba(6,78,59,0.08)] hover:shadow-[0_26px_80px_rgba(6,78,59,0.16)] transition-shadow duration-300 flex flex-col h-full"
         >
-            <div className="relative h-48 overflow-hidden">
+            <div className="relative h-44 overflow-hidden flex-shrink-0">
                 <motion.div
                     whileHover={{ scale: 1.1 }}
                     transition={{ duration: 0.7, ease: "easeOut" }}
@@ -392,7 +529,7 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
                     <div
                         className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-black shadow-md ${getTransportColor(booking.transportType)}`}
                     >
-                        <TransportIcon className="text-sm" />{" "}
+                        <TransportIcon className="text-sm" />
                         <span>{booking.transportType}</span>
                     </div>
                 </motion.div>
@@ -403,28 +540,24 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
                     className="absolute bottom-3 left-4 right-4"
                 >
                     <h3 className="text-lg font-black text-white drop-shadow-lg line-clamp-1 flex items-center gap-2">
-                        <TransportIcon className="text-xl" /> {booking.title}
+                        <TransportIcon className="text-xl flex-shrink-0" />{" "}
+                        {booking.title}
                     </h3>
                 </motion.div>
             </div>
 
-            <div className="p-5 flex flex-col flex-grow gap-4">
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className="flex items-center justify-between bg-emerald-50 dark:bg-[#07111F] rounded-xl px-3 py-3 border border-emerald-100 dark:border-emerald-900/50"
-                >
+            <div className="p-4 flex flex-col flex-grow gap-3">
+                <div className="flex items-center justify-between bg-emerald-50 dark:bg-[#07111F] rounded-xl px-3 py-2.5 border border-emerald-100 dark:border-emerald-900/50">
                     <div className="text-center flex-1">
-                        <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mb-1.5">
+                        <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mb-1">
                             From
                         </p>
-                        <p className="font-black text-[#064E3B] dark:text-white text-sm">
+                        <p className="font-black text-[#064E3B] dark:text-white text-sm truncate">
                             {booking.from}
                         </p>
                     </div>
-                    <div className="flex flex-col items-center gap-1 flex-shrink-0 px-3">
-                        <div className="w-8 h-[1px] bg-gray-300 dark:bg-gray-700" />
+                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0 px-2">
+                        <div className="w-6 h-[1px] bg-gray-300 dark:bg-gray-700" />
                         <motion.div
                             animate={{ y: [0, -3, 0] }}
                             transition={{
@@ -433,28 +566,23 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
                                 ease: "easeInOut",
                             }}
                         >
-                            <FiMapPin className="text-emerald-600 dark:text-emerald-400 text-lg" />
+                            <FiMapPin className="text-emerald-600 dark:text-emerald-400 text-base" />
                         </motion.div>
-                        <div className="w-8 h-[1px] bg-gray-300 dark:bg-gray-700" />
+                        <div className="w-6 h-[1px] bg-gray-300 dark:bg-gray-700" />
                     </div>
                     <div className="text-center flex-1">
-                        <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mb-1.5">
+                        <p className="text-[9px] text-gray-500 dark:text-gray-400 uppercase font-black tracking-widest mb-1">
                             To
                         </p>
-                        <p className="font-black text-[#064E3B] dark:text-white text-sm">
+                        <p className="font-black text-[#064E3B] dark:text-white text-sm truncate">
                             {booking.to}
                         </p>
                     </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
-                    className="flex items-center gap-2.5 bg-orange-50 dark:bg-orange-950/20 rounded-xl px-3 py-3 border border-orange-100 dark:border-orange-900/30"
-                >
-                    <FiCalendar className="text-orange-600 dark:text-orange-400 flex-shrink-0 text-base" />
-                    <div className="flex items-center gap-2 flex-1 flex-wrap">
+                <div className="flex items-center gap-2 bg-orange-50 dark:bg-orange-950/20 rounded-xl px-3 py-2.5 border border-orange-100 dark:border-orange-900/30">
+                    <FiCalendar className="text-orange-600 dark:text-orange-400 flex-shrink-0 text-sm" />
+                    <div className="flex items-center gap-1.5 flex-1 flex-wrap">
                         <span className="text-gray-700 dark:text-gray-300 font-bold text-sm">
                             {date}
                         </span>
@@ -463,125 +591,117 @@ const BookingCard = ({ booking, onCancelClick, onPaymentClick }) => {
                             {time}
                         </span>
                     </div>
-                </motion.div>
+                </div>
 
-                <StatusMessageCard status={booking.status} />
-                <CountdownTimer
-                    departureDate={booking.departureDate}
-                    status={booking.status}
-                />
+                {showStatusMessage && (
+                    <StatusMessageCard status={booking.status} />
+                )}
 
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.35, type: "spring", stiffness: 200 }}
-                    className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 rounded-xl px-4 py-4 border-2 border-emerald-200 dark:border-emerald-900 text-center mt-auto"
-                >
-                    <p className="text-[9px] text-gray-600 dark:text-gray-400 font-black uppercase tracking-widest">
-                        Total Amount
-                    </p>
-                    <motion.p
-                        initial={{ scale: 0.5 }}
-                        animate={{ scale: 1 }}
-                        transition={{
-                            delay: 0.5,
-                            type: "spring",
-                            stiffness: 200,
-                        }}
-                        className="text-3xl font-black text-emerald-700 dark:text-emerald-400 mt-1.5"
-                    >
-                        ৳{booking.totalPrice}
-                    </motion.p>
-                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-1.5 font-semibold">
-                        ৳{booking.unitPrice} × {booking.quantity} seats
-                    </p>
-                </motion.div>
+                {showPaidJourney && (
+                    <PaidJourneyCard departureDate={booking.departureDate} />
+                )}
 
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="pt-1"
-                >
-                    {booking.status === "accepted" && (
-                        <motion.div
-                            whileHover={!isPast ? { scale: 1.02 } : {}}
-                            whileTap={!isPast ? { scale: 0.98 } : {}}
-                        >
+                {showCountdown && (
+                    <CountdownTimer
+                        departureDate={booking.departureDate}
+                        status={booking.status}
+                    />
+                )}
+
+                <div className="mt-auto flex flex-col gap-3">
+                    <div className="bg-gradient-to-br from-emerald-50 to-green-50 dark:from-emerald-950/40 dark:to-green-950/40 rounded-xl px-4 py-3 border-2 border-emerald-200 dark:border-emerald-900 text-center">
+                        <p className="text-[9px] text-gray-600 dark:text-gray-400 font-black uppercase tracking-widest">
+                            Total Amount
+                        </p>
+                        <p className="text-2xl font-black text-emerald-700 dark:text-emerald-400 mt-1">
+                            ৳{booking.totalPrice}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-500 mt-1 font-semibold">
+                            ৳{booking.unitPrice} × {booking.quantity} seats
+                        </p>
+                    </div>
+
+                    <div>
+                        {booking.status === "accepted" && (
+                            <motion.div
+                                whileHover={!isPast ? { scale: 1.02 } : {}}
+                                whileTap={!isPast ? { scale: 0.98 } : {}}
+                            >
+                                <Button
+                                    variant="none"
+                                    onClick={() =>
+                                        !isPast && onPaymentClick(booking)
+                                    }
+                                    disabled={isPast}
+                                    className={`w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                                        isPast
+                                            ? "bg-gray-200 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
+                                            : "bg-gradient-to-r from-[#064E3B] via-emerald-600 to-green-500 hover:opacity-90 text-white shadow-lg shadow-emerald-600/25"
+                                    }`}
+                                >
+                                    <FiCreditCard className="text-base" />
+                                    {isPast ? "Expired" : "Pay Now"}
+                                </Button>
+                            </motion.div>
+                        )}
+                        {booking.status === "pending" && (
+                            <motion.div
+                                whileHover={!isPast ? { scale: 1.02 } : {}}
+                                whileTap={!isPast ? { scale: 0.98 } : {}}
+                            >
+                                <Button
+                                    variant="none"
+                                    onClick={() =>
+                                        !isPast && onCancelClick(bookingId)
+                                    }
+                                    disabled={isPast}
+                                    className={`w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
+                                        isPast
+                                            ? "bg-gray-200 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
+                                            : "bg-gradient-to-r from-red-600 to-red-800 hover:opacity-90 text-white shadow-lg shadow-red-500/25"
+                                    }`}
+                                >
+                                    <FiTrash2 className="text-base" />
+                                    {isPast ? "Expired" : "Cancel Booking"}
+                                </Button>
+                            </motion.div>
+                        )}
+                        {booking.status === "paid" && (
+                            <motion.div
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                            >
+                                <Button
+                                    variant="none"
+                                    className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white shadow-lg shadow-purple-500/25 transition-all duration-300"
+                                >
+                                    <FiDownload className="text-base" />
+                                    Download Ticket
+                                </Button>
+                            </motion.div>
+                        )}
+                        {booking.status === "rejected" && (
                             <Button
                                 variant="none"
-                                onClick={() =>
-                                    !isPast && onPaymentClick(booking)
-                                }
-                                disabled={isPast}
-                                className={`w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                                    isPast
-                                        ? "bg-gray-200 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-[#064E3B] via-emerald-600 to-green-500 hover:opacity-90 text-white shadow-lg shadow-emerald-600/25"
-                                }`}
+                                disabled
+                                className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-red-100 dark:bg-red-950/40 text-red-500 dark:text-red-400 border-2 border-red-200 dark:border-red-900/60 cursor-not-allowed opacity-70"
                             >
-                                <FiCreditCard className="text-base" />{" "}
-                                {isPast ? "Expired" : "Pay Now"}
+                                <AiFillCloseCircle className="text-base" />
+                                Booking Rejected
                             </Button>
-                        </motion.div>
-                    )}
-                    {booking.status === "pending" && (
-                        <motion.div
-                            whileHover={!isPast ? { scale: 1.02 } : {}}
-                            whileTap={!isPast ? { scale: 0.98 } : {}}
-                        >
+                        )}
+                        {booking.status === "cancelled" && (
                             <Button
                                 variant="none"
-                                onClick={() =>
-                                    !isPast && onCancelClick(bookingId)
-                                }
-                                disabled={isPast}
-                                className={`w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 transition-all duration-300 ${
-                                    isPast
-                                        ? "bg-gray-200 dark:bg-gray-800 text-gray-500 cursor-not-allowed"
-                                        : "bg-gradient-to-r from-red-600 to-red-800 hover:opacity-90 text-white shadow-lg shadow-red-500/25"
-                                }`}
+                                disabled
+                                className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70"
                             >
-                                <FiTrash2 className="text-base" />
-                                {isPast ? "Expired" : "Cancel Booking"}
+                                <FiXCircle className="text-base" />
+                                Booking Cancelled
                             </Button>
-                        </motion.div>
-                    )}
-                    {booking.status === "paid" && (
-                        <motion.div
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                        >
-                            <Button
-                                variant="none"
-                                className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:opacity-90 text-white shadow-lg shadow-purple-500/25 transition-all duration-300"
-                            >
-                                <FiDownload className="text-base" /> Download
-                                Ticket
-                            </Button>
-                        </motion.div>
-                    )}
-                    {booking.status === "rejected" && (
-                        <Button
-                            variant="none"
-                            disabled
-                            className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-red-100 dark:bg-red-950/40 text-red-500 dark:text-red-400 border-2 border-red-200 dark:border-red-900/60 cursor-not-allowed opacity-70"
-                        >
-                            <AiFillCloseCircle className="text-base" /> Booking
-                            Rejected
-                        </Button>
-                    )}
-                    {booking.status === "cancelled" && (
-                        <Button
-                            variant="none"
-                            disabled
-                            className="w-full h-11 rounded-xl font-black text-sm flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800/50 text-gray-500 dark:text-gray-400 border-2 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-70"
-                        >
-                            <FiXCircle className="text-base" /> Booking
-                            Cancelled
-                        </Button>
-                    )}
-                </motion.div>
+                        )}
+                    </div>
+                </div>
             </div>
         </motion.div>
     );
@@ -747,7 +867,7 @@ const CancelModal = ({ isOpen, onClose, onConfirm, isProcessing }) => (
                                     </motion.span>
                                 ) : (
                                     <FiTrash2 />
-                                )}{" "}
+                                )}
                                 {isProcessing ? "Cancelling..." : "Yes, Cancel"}
                             </motion.button>
                         </motion.div>
@@ -931,7 +1051,7 @@ const PaymentModal = ({ payBooking, onClose, isProcessing, user }) => {
                                             </motion.span>
                                         ) : (
                                             <FiCreditCard />
-                                        )}{" "}
+                                        )}
                                         {processing
                                             ? "Redirecting..."
                                             : `Pay ৳${payBooking.totalPrice}`}
@@ -1263,7 +1383,7 @@ const MyBookedTicketsClient = ({ user, initialBookings }) => {
                                 initial="hidden"
                                 animate="visible"
                                 exit={{ opacity: 0 }}
-                                className="grid grid-cols-1 gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 xl:gap-8"
+                                className="grid grid-cols-1 gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 xl:gap-8 auto-rows-fr"
                             >
                                 <AnimatePresence mode="popLayout">
                                     {filtered.map((b) => (

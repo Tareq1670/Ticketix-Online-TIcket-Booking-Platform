@@ -4,11 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaBus, FaTrain, FaPlane, FaShip, FaBusAlt } from "react-icons/fa";
-import {
-    MdLocationOn,
-    MdArrowForward,
-    MdEmojiTransportation,
-} from "react-icons/md";
+import { MdLocationOn, MdArrowForward, MdAccessTime, MdDateRange } from "react-icons/md";
 import { TbCurrencyTaka } from "react-icons/tb";
 import { FiPackage } from "react-icons/fi";
 import { IoTicketSharp } from "react-icons/io5";
@@ -33,8 +29,7 @@ const normalizeImageUrl = (url) => {
     if (value.startsWith("/")) return value;
     try {
         const parsed = new URL(value);
-        if (parsed.protocol === "http:" || parsed.protocol === "https:")
-            return parsed.href;
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
         return "";
     } catch {
         return "";
@@ -44,13 +39,62 @@ const normalizeImageUrl = (url) => {
 const getTransportIcon = (type) => {
     if (!type) return FaBus;
     const t = String(type).toLowerCase();
-    if (t.includes("plane") || t.includes("flight") || t.includes("air"))
-        return FaPlane;
+    if (t.includes("plane") || t.includes("flight") || t.includes("air")) return FaPlane;
     if (t.includes("bus")) return FaBusAlt;
     if (t.includes("train")) return FaTrain;
-    if (t.includes("launch") || t.includes("boat") || t.includes("ship"))
-        return FaShip;
+    if (t.includes("launch") || t.includes("boat") || t.includes("ship")) return FaShip;
     return FaBus;
+};
+
+const getDepartureRaw = (ticket) => {
+    return (
+        ticket.departureDateTime ||
+        ticket.departure_date_time ||
+        ticket.departureDate ||
+        ticket.departure ||
+        ticket.date ||
+        null
+    );
+};
+
+const formatDepartureDate = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return null;
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+    } catch {
+        return null;
+    }
+};
+
+const formatDepartureTime = (dateStr) => {
+    if (!dateStr) return null;
+    try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return null;
+        return date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: true,
+        });
+    } catch {
+        return null;
+    }
+};
+
+const isDeparturePassed = (dateStr) => {
+    if (!dateStr) return false;
+    try {
+        const date = new Date(dateStr);
+        return date < new Date();
+    } catch {
+        return false;
+    }
 };
 
 const CardTickets = ({ ticket, index = 0 }) => {
@@ -64,6 +108,11 @@ const CardTickets = ({ ticket, index = 0 }) => {
     const perks = Array.isArray(ticket.perks) ? ticket.perks : [];
     const imageSrc = normalizeImageUrl(ticket.image);
     const TransportIcon = getTransportIcon(transport);
+
+    const departureRaw = getDepartureRaw(ticket);
+    const departureDate = formatDepartureDate(departureRaw);
+    const departureTime = formatDepartureTime(departureRaw);
+    const departed = isDeparturePassed(departureRaw);
 
     return (
         <motion.div
@@ -87,6 +136,7 @@ const CardTickets = ({ ticket, index = 0 }) => {
                         <IoTicketSharp className="text-6xl text-emerald-200/60 dark:text-emerald-800/60" />
                     </div>
                 )}
+
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
                 <div className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1.5 text-xs font-bold text-emerald-700 shadow-lg backdrop-blur-md dark:bg-black/60 dark:text-emerald-300">
@@ -94,9 +144,30 @@ const CardTickets = ({ ticket, index = 0 }) => {
                     {transport}
                 </div>
 
-                <div className="absolute right-4 top-4 rounded-full bg-emerald-500 px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-lg">
-                    New
+                <div
+                    className={`absolute right-4 top-4 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider text-white shadow-lg ${
+                        departed ? "bg-red-500" : "bg-emerald-500"
+                    }`}
+                >
+                    {departed ? "Departed" : "New"}
                 </div>
+
+                {(departureDate || departureTime) && (
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
+                        {departureDate && (
+                            <div className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+                                <MdDateRange size={13} className="text-emerald-300" />
+                                {departureDate}
+                            </div>
+                        )}
+                        {departureTime && (
+                            <div className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
+                                <MdAccessTime size={13} className="text-emerald-300" />
+                                {departureTime}
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="flex flex-1 flex-col p-5">
@@ -114,6 +185,42 @@ const CardTickets = ({ ticket, index = 0 }) => {
                         {to}
                     </span>
                 </div>
+
+                {(departureDate || departureTime) ? (
+                    <div
+                        className={`mt-3 flex flex-wrap items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold ${
+                            departed
+                                ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
+                                : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                        }`}
+                    >
+                        {departureDate && (
+                            <span className="flex items-center gap-1.5">
+                                <MdDateRange size={15} />
+                                {departureDate}
+                            </span>
+                        )}
+                        {departureDate && departureTime && (
+                            <span className="h-3.5 w-px bg-current opacity-30" />
+                        )}
+                        {departureTime && (
+                            <span className="flex items-center gap-1.5">
+                                <MdAccessTime size={15} />
+                                {departureTime}
+                            </span>
+                        )}
+                        {departed && (
+                            <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase text-red-600 dark:bg-red-900/40 dark:text-red-400">
+                                Departed
+                            </span>
+                        )}
+                    </div>
+                ) : (
+                    <div className="mt-3 flex items-center gap-1.5 rounded-xl bg-zinc-100 px-3 py-2.5 text-xs font-semibold text-zinc-400 dark:bg-white/5 dark:text-zinc-600">
+                        <MdDateRange size={15} />
+                        Departure info not available
+                    </div>
+                )}
 
                 <div className="mt-4 flex items-center justify-between border-t border-zinc-100 pt-4 dark:border-white/10">
                     <div>
@@ -157,7 +264,7 @@ const CardTickets = ({ ticket, index = 0 }) => {
                 <div className="mt-auto pt-5">
                     <Link
                         href={`/tickets/details/${id}`}
-                        className="group/btn flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300  active:scale-[0.98]"
+                        className="group/btn flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-green-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg transition-all duration-300 active:scale-[0.98]"
                     >
                         See Details
                         <MdArrowForward className="transition-transform duration-300 group-hover/btn:translate-x-1" />

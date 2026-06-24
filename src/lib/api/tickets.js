@@ -22,3 +22,10 @@ export const getTicketById = async(id) => {
         cache: "no-store",
     })
 }
+
+
+export const getLatestTickets = async() => {
+    return serverDataFetch("/api/latest-tickets",{
+        cache : "no-store"
+    })
+}

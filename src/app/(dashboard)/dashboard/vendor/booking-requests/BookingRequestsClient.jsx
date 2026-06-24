@@ -822,7 +822,7 @@ const BookingRequestsClient = ({ initialBookings, vendorId }) => {
                 >
                     <motion.div
                         variants={itemVariants}
-                        className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8"
+                        className="relative hidden md:block overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8"
                     >
                         <motion.div
                             animate={{
@@ -846,14 +846,7 @@ const BookingRequestsClient = ({ initialBookings, vendorId }) => {
                         />
                         <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                             <div>
-                                <motion.div
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.2 }}
-                                    className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-md"
-                                >
-                                    <FaTicketAlt /> Ticketix Vendor Dashboard
-                                </motion.div>
+                                
                                 <motion.h1
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -1033,14 +1026,7 @@ const BookingRequestsClient = ({ initialBookings, vendorId }) => {
                                             }}
                                             className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-600 to-green-500 px-4 font-black text-white shadow-lg shadow-emerald-700/25 transition hover:opacity-90"
                                         >
-                                            <motion.div
-                                                animate={{ rotate: 360 }}
-                                                transition={{
-                                                    duration: 2,
-                                                    repeat: Infinity,
-                                                    ease: "linear",
-                                                }}
-                                            >
+                                            <motion.div>
                                                 <FiRefreshCw />
                                             </motion.div>
                                             Reset

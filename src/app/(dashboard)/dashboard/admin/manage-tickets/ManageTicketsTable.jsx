@@ -25,6 +25,7 @@ import {
     MdDirectionsBoat,
 } from "react-icons/md";
 import { approveTicket, rejectTicket } from "@/lib/actions/admin";
+import Image from "next/image";
 
 const normalizeImageUrl = (url) => {
     if (!url || typeof url !== "string") return "";
@@ -128,7 +129,9 @@ const TicketImage = ({ src, title, className = "" }) => {
             className={`relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-green-500 to-lime-400 ${className}`}
         >
             {imageSrc && !imageError ? (
-                <img
+                <Image
+                height={500}
+                width={500}
                     src={imageSrc}
                     alt={title || "Ticket"}
                     loading="lazy"
@@ -611,14 +614,12 @@ const ManageTicketsTable = ({ tickets: initialTickets }) => {
 
     return (
         <div className="min-h-screen space-y-5 rounded-[28px] bg-[#F0FDF4] p-3 sm:space-y-7 sm:p-5 lg:p-6 dark:bg-[#06130D]">
-            <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8">
+            <div className="relative hidden md:block overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8">
                 <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/15 blur-3xl" />
                 <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-lime-300/30 blur-3xl" />
                 <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
                     <div>
-                        <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/15 px-4 py-1.5 text-xs font-bold text-white backdrop-blur-md">
-                            <FaTicketAlt /> Ticketix Admin Dashboard
-                        </div>
+
                         <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
                             Manage Tickets
                         </h1>
@@ -649,7 +650,7 @@ const ManageTicketsTable = ({ tickets: initialTickets }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="grid  gap-4 grid-cols-2 xl:grid-cols-4">
                 <StatCard
                     title="Total Tickets"
                     value={totalTickets}

@@ -30,7 +30,7 @@ const AdvertisementSection = async () => {
     if (tickets.length === 0) return null;
 
     return (
-        <section className="relative overflow-hidden bg-white px-4 py-24 dark:bg-zinc-950 md:px-8">
+        <section className="relative overflow-hidden bg-white px-4 py-15 dark:bg-zinc-950 md:px-8">
             {/* Background Glows */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute -left-20 top-20 h-96 w-96 rounded-full bg-emerald-500/10 blur-[128px]" />
@@ -39,11 +39,7 @@ const AdvertisementSection = async () => {
 
             <div className="relative z-10 mx-auto max-w-7xl">
                 <div className="mb-16 text-center">
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-4 py-1.5 text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
-                        <FaWandMagicSparkles />
-                        Special Promotions
-                    </div>
+                    
                     
                     <h2 className="mt-6 text-3xl font-black tracking-tight text-zinc-900 dark:text-white md:text-5xl">
                         Featured Tickets
