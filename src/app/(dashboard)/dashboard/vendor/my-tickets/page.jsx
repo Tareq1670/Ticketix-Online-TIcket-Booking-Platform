@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/core/session";
-import MyTicketsCard from "./MyTicketsCard";
 import { getMyAddedTickets } from "@/lib/api/tickets";
+import MyTicketsCard from "./MyTicketsCard";
 
 const MyTicketsPage = async () => {
     const user = await getUser();

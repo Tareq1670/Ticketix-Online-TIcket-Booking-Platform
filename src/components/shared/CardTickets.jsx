@@ -4,7 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { FaBus, FaTrain, FaPlane, FaShip, FaBusAlt } from "react-icons/fa";
-import { MdLocationOn, MdArrowForward, MdAccessTime, MdDateRange } from "react-icons/md";
+import {
+    MdLocationOn,
+    MdArrowForward,
+    MdAccessTime,
+    MdDateRange,
+} from "react-icons/md";
 import { TbCurrencyTaka } from "react-icons/tb";
 import { FiPackage } from "react-icons/fi";
 import { IoTicketSharp } from "react-icons/io5";
@@ -27,9 +32,12 @@ const normalizeImageUrl = (url) => {
     if (value.startsWith("data:image/")) return value;
     if (value.startsWith("//")) return `https:${value}`;
     if (value.startsWith("/")) return value;
+
     try {
         const parsed = new URL(value);
-        if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.href;
+        if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+            return parsed.href;
+        }
         return "";
     } catch {
         return "";
@@ -39,10 +47,14 @@ const normalizeImageUrl = (url) => {
 const getTransportIcon = (type) => {
     if (!type) return FaBus;
     const t = String(type).toLowerCase();
-    if (t.includes("plane") || t.includes("flight") || t.includes("air")) return FaPlane;
+
+    if (t.includes("plane") || t.includes("flight") || t.includes("air"))
+        return FaPlane;
     if (t.includes("bus")) return FaBusAlt;
     if (t.includes("train")) return FaTrain;
-    if (t.includes("launch") || t.includes("boat") || t.includes("ship")) return FaShip;
+    if (t.includes("launch") || t.includes("boat") || t.includes("ship"))
+        return FaShip;
+
     return FaBus;
 };
 
@@ -57,54 +69,49 @@ const getDepartureRaw = (ticket) => {
     );
 };
 
-const formatDepartureDate = (dateStr) => {
+const getDepartureDateObject = (dateStr) => {
     if (!dateStr) return null;
-    try {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return null;
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-    } catch {
-        return null;
-    }
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return null;
+    return date;
+};
+
+const formatDepartureDate = (dateStr) => {
+    const date = getDepartureDateObject(dateStr);
+    if (!date) return null;
+
+    return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+    });
 };
 
 const formatDepartureTime = (dateStr) => {
-    if (!dateStr) return null;
-    try {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return null;
-        return date.toLocaleTimeString("en-US", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-        });
-    } catch {
-        return null;
-    }
+    const date = getDepartureDateObject(dateStr);
+    if (!date) return null;
+
+    return date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    });
 };
 
 const isDeparturePassed = (dateStr) => {
-    if (!dateStr) return false;
-    try {
-        const date = new Date(dateStr);
-        return date < new Date();
-    } catch {
-        return false;
-    }
+    const date = getDepartureDateObject(dateStr);
+    if (!date) return false;
+    return date.getTime() < Date.now();
 };
 
-const CardTickets = ({ ticket, index = 0 }) => {
+const CardTickets = ({ ticket = {}, index = 0 }) => {
     const id = getPlainId(ticket._id || ticket.id);
-    const title = ticket.title || "Untitled Ticket";
-    const from = ticket.from || "N/A";
-    const to = ticket.to || "N/A";
-    const price = ticket.price || 0;
-    const quantity = ticket.quantity || 0;
-    const transport = ticket.transportType || "Bus";
+    const title = ticket.title ?? "Untitled Ticket";
+    const from = ticket.from ?? "N/A";
+    const to = ticket.to ?? "N/A";
+    const price = ticket.price ?? 0;
+    const quantity = ticket.quantity ?? 0;
+    const transport = ticket.transportType ?? "Bus";
     const perks = Array.isArray(ticket.perks) ? ticket.perks : [];
     const imageSrc = normalizeImageUrl(ticket.image);
     const TransportIcon = getTransportIcon(transport);
@@ -149,25 +156,8 @@ const CardTickets = ({ ticket, index = 0 }) => {
                         departed ? "bg-red-500" : "bg-emerald-500"
                     }`}
                 >
-                    {departed ? "Departed" : "New"}
+                    {departed ? "Departed" : "Upcoming"}
                 </div>
-
-                {(departureDate || departureTime) && (
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-                        {departureDate && (
-                            <div className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
-                                <MdDateRange size={13} className="text-emerald-300" />
-                                {departureDate}
-                            </div>
-                        )}
-                        {departureTime && (
-                            <div className="flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-semibold text-white backdrop-blur-md">
-                                <MdAccessTime size={13} className="text-emerald-300" />
-                                {departureTime}
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
 
             <div className="flex flex-1 flex-col p-5">
@@ -186,34 +176,43 @@ const CardTickets = ({ ticket, index = 0 }) => {
                     </span>
                 </div>
 
-                {(departureDate || departureTime) ? (
+                {departureDate || departureTime ? (
                     <div
-                        className={`mt-3 flex flex-wrap items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold ${
+                        className={`mt-3 rounded-xl px-3 py-2.5 text-xs font-semibold ${
                             departed
                                 ? "bg-red-50 text-red-600 dark:bg-red-950/30 dark:text-red-400"
                                 : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                         }`}
                     >
-                        {departureDate && (
-                            <span className="flex items-center gap-1.5">
-                                <MdDateRange size={15} />
-                                {departureDate}
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="font-bold uppercase tracking-wide opacity-80">
+                                Departure
                             </span>
-                        )}
-                        {departureDate && departureTime && (
-                            <span className="h-3.5 w-px bg-current opacity-30" />
-                        )}
-                        {departureTime && (
-                            <span className="flex items-center gap-1.5">
-                                <MdAccessTime size={15} />
-                                {departureTime}
-                            </span>
-                        )}
-                        {departed && (
-                            <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase text-red-600 dark:bg-red-900/40 dark:text-red-400">
-                                Departed
-                            </span>
-                        )}
+
+                            {departureDate && (
+                                <span className="flex items-center gap-1.5">
+                                    <MdDateRange size={15} />
+                                    {departureDate}
+                                </span>
+                            )}
+
+                            {departureDate && departureTime && (
+                                <span className="h-3.5 w-px bg-current opacity-30" />
+                            )}
+
+                            {departureTime && (
+                                <span className="flex items-center gap-1.5">
+                                    <MdAccessTime size={15} />
+                                    {departureTime}
+                                </span>
+                            )}
+
+                            {departed && (
+                                <span className="ml-auto rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase text-red-600 dark:bg-red-900/40 dark:text-red-400">
+                                    Departed
+                                </span>
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="mt-3 flex items-center gap-1.5 rounded-xl bg-zinc-100 px-3 py-2.5 text-xs font-semibold text-zinc-400 dark:bg-white/5 dark:text-zinc-600">
@@ -232,6 +231,7 @@ const CardTickets = ({ ticket, index = 0 }) => {
                             {price}
                         </p>
                     </div>
+
                     <div className="text-right">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
                             Available
@@ -253,6 +253,7 @@ const CardTickets = ({ ticket, index = 0 }) => {
                                 {perk}
                             </span>
                         ))}
+
                         {perks.length > 3 && (
                             <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
                                 +{perks.length - 3} more

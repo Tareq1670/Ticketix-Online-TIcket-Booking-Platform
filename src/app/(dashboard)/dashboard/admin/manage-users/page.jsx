@@ -4,7 +4,6 @@ import React from 'react';
 
 const ManageUsersPage = async () => {
   const { users } = await getUsersList();
-  console.log(users);
 
   return (
     <div className="p-6">

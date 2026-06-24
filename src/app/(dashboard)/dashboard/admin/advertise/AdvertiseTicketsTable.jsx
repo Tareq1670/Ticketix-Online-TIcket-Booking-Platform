@@ -23,8 +23,8 @@ import {
     MdDirectionsBoat,
 } from "react-icons/md";
 import { toggleAdvertise } from "@/lib/actions/advertise";
+import { motion, AnimatePresence } from "framer-motion";
 
-// ─── Helpers ───
 const normalizeImageUrl = (url) => {
     if (!url || typeof url !== "string") return "";
     const value = url.trim();
@@ -116,7 +116,115 @@ const getTransportColor = (type) => {
     return "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300";
 };
 
-// ─── Ticket Image ───
+const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.07, delayChildren: 0.05 },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 22 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 400, damping: 25 },
+    },
+};
+
+const heroVariants = {
+    hidden: { opacity: 0, y: -28, scale: 0.98 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: {
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            staggerChildren: 0.1,
+        },
+    },
+};
+
+const statCardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.95 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { type: "spring", stiffness: 400, damping: 25 },
+    },
+};
+
+const tableContainerVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 350, damping: 28 },
+    },
+};
+
+const filterBarVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            type: "spring",
+            stiffness: 400,
+            damping: 25,
+            staggerChildren: 0.05,
+        },
+    },
+};
+
+const filterItemVariants = {
+    hidden: { opacity: 0, y: -8 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 450, damping: 25 },
+    },
+};
+
+const mobileCardVariants = {
+    hidden: { opacity: 0, y: 20, scale: 0.97 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { type: "spring", stiffness: 400, damping: 25 },
+    },
+};
+
+const emptyStateVariants = {
+    hidden: { opacity: 0, scale: 0.9 },
+    visible: {
+        opacity: 1,
+        scale: 1,
+        transition: { type: "spring", stiffness: 400, damping: 25 },
+    },
+};
+
+const warningVariants = {
+    hidden: { opacity: 0, height: 0, marginTop: 0 },
+    visible: {
+        opacity: 1,
+        height: "auto",
+        marginTop: 0,
+        transition: { type: "spring", stiffness: 400, damping: 30 },
+    },
+    exit: {
+        opacity: 0,
+        height: 0,
+        marginTop: 0,
+        transition: { duration: 0.25 },
+    },
+};
+
 const TicketImage = ({ src, title, className = "" }) => {
     const [imageError, setImageError] = useState(false);
     const imageSrc = normalizeImageUrl(src);
@@ -146,7 +254,6 @@ const TicketImage = ({ src, title, className = "" }) => {
     );
 };
 
-// ─── Stat Card ───
 const StatCard = ({
     title,
     value,
@@ -156,36 +263,48 @@ const StatCard = ({
     cardClass,
     borderClass,
 }) => (
-    <div
-        className={`group relative overflow-hidden rounded-[24px] border ${borderClass} bg-gradient-to-br ${cardClass} p-5 shadow-[0_18px_50px_rgba(6,78,59,0.08)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_26px_80px_rgba(6,78,59,0.16)] sm:rounded-[26px]`}
+    <motion.div
+        variants={statCardVariants}
+        whileHover={{ y: -4, scale: 1.02 }}
+        transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        className={`group relative overflow-hidden rounded-[24px] border ${borderClass} bg-gradient-to-br ${cardClass} p-5 shadow-[0_18px_50px_rgba(6,78,59,0.08)] transition-shadow hover:shadow-[0_26px_80px_rgba(6,78,59,0.16)] sm:rounded-[26px]`}
     >
         <div className="absolute right-0 top-0 h-24 w-24 rounded-bl-full bg-white/50 dark:bg-white/5" />
         <div className="relative z-10 flex items-center justify-between">
             <div>
-                <p className={`text-3xl font-black sm:text-4xl ${numberClass}`}>
+                <motion.p
+                    key={value}
+                    initial={{ scale: 1.2, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                    className={`text-3xl font-black sm:text-4xl ${numberClass}`}
+                >
                     {value}
-                </p>
+                </motion.p>
                 <p className="mt-1 text-sm font-bold text-gray-500 dark:text-gray-400">
                     {title}
                 </p>
             </div>
-            <div
-                className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-xl transition-transform duration-300 group-hover:scale-110 sm:h-14 sm:w-14 ${iconClass}`}
+            <motion.div
+                whileHover={{ scale: 1.15, rotate: 8 }}
+                transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-xl sm:h-14 sm:w-14 ${iconClass}`}
             >
                 <Icon className="text-2xl" />
-            </div>
+            </motion.div>
         </div>
-    </div>
+    </motion.div>
 );
 
-// ─── Toggle Switch ───
 const AdvertiseToggle = ({ isOn, loading, onToggle, disabled }) => {
     return (
-        <button
+        <motion.button
             type="button"
             onClick={onToggle}
             disabled={loading || disabled}
-            className={`relative inline-flex h-8 w-[52px] shrink-0 cursor-pointer items-center rounded-full transition-all duration-300 focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 ${
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`relative inline-flex h-8 w-[52px] shrink-0 cursor-pointer items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-50 ${
                 isOn
                     ? "bg-gradient-to-r from-emerald-500 to-green-400 shadow-lg shadow-emerald-500/30 focus:ring-emerald-500/20"
                     : "bg-gray-200 shadow-inner focus:ring-gray-300/30 dark:bg-gray-700"
@@ -194,8 +313,14 @@ const AdvertiseToggle = ({ isOn, loading, onToggle, disabled }) => {
         >
             {loading ? (
                 <span className="absolute inset-0 flex items-center justify-center">
-                    <svg
-                        className="h-4 w-4 animate-spin text-white"
+                    <motion.svg
+                        animate={{ rotate: 360 }}
+                        transition={{
+                            duration: 1,
+                            repeat: Infinity,
+                            ease: "linear",
+                        }}
+                        className="h-4 w-4 text-white"
                         fill="none"
                         viewBox="0 0 24 24"
                     >
@@ -212,31 +337,60 @@ const AdvertiseToggle = ({ isOn, loading, onToggle, disabled }) => {
                             fill="currentColor"
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
                         />
-                    </svg>
+                    </motion.svg>
                 </span>
             ) : (
-                <span
-                    className={`inline-flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md transition-all duration-300 ${
+                <motion.span
+                    layout
+                    transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                    }}
+                    className={`inline-flex h-6 w-6 items-center justify-center rounded-full bg-white shadow-md ${
                         isOn ? "translate-x-[22px]" : "translate-x-[3px]"
                     }`}
                 >
-                    {isOn ? (
-                        <FiVolume2 className="h-3.5 w-3.5 text-emerald-600" />
-                    ) : (
-                        <FiVolumeX className="h-3.5 w-3.5 text-gray-400" />
-                    )}
-                </span>
+                    <AnimatePresence mode="wait">
+                        {isOn ? (
+                            <motion.div
+                                key="on"
+                                initial={{ scale: 0, rotate: -90 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                exit={{ scale: 0, rotate: 90 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 500,
+                                    damping: 20,
+                                }}
+                            >
+                                <FiVolume2 className="h-3.5 w-3.5 text-emerald-600" />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="off"
+                                initial={{ scale: 0, rotate: 90 }}
+                                animate={{ scale: 1, rotate: 0 }}
+                                exit={{ scale: 0, rotate: -90 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 500,
+                                    damping: 20,
+                                }}
+                            >
+                                <FiVolumeX className="h-3.5 w-3.5 text-gray-400" />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </motion.span>
             )}
-        </button>
+        </motion.button>
     );
 };
 
-// ═══════════════════════════════════════════════
-// ─── MAIN COMPONENT ───
-// ═══════════════════════════════════════════════
 const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
     const [tickets, setTickets] = useState(() =>
-        toTicketsArray(initialTickets)
+        toTicketsArray(initialTickets),
     );
     const [search, setSearch] = useState("");
     const [transportFilter, setTransportFilter] = useState("all");
@@ -249,8 +403,6 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
 
     const getTicketId = (t) => getPlainId(t?._id || t?.id);
     const getTicketKey = (t, i) => getTicketId(t) || `ticket-${i}`;
-
-    // Ticket field getters
     const getTitle = (t) => t?.title || t?.ticketTitle || "Untitled Ticket";
     const getFrom = (t) => t?.from || t?.fromLocation || "N/A";
     const getTo = (t) => t?.to || t?.toLocation || "N/A";
@@ -258,8 +410,7 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
         t?.transportType || t?.transport_type || "Unknown";
     const getPrice = (t) => t?.price || t?.ticketPrice || 0;
     const getQuantity = (t) => t?.ticketQuantity || t?.quantity || 0;
-    const getImage = (t) =>
-        normalizeImageUrl(t?.image || t?.ticketImage || "");
+    const getImage = (t) => normalizeImageUrl(t?.image || t?.ticketImage || "");
     const getPerks = (t) => {
         if (Array.isArray(t?.perks)) return t.perks;
         if (typeof t?.perks === "string")
@@ -272,15 +423,13 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
     const getDeparture = (t) =>
         t?.departureDate || t?.departure || t?.departureDateTime || null;
 
-    // Counts
     const advertisedCount = useMemo(
         () => tickets.filter((t) => parseBoolean(t?.isAdvertised)).length,
-        [tickets]
+        [tickets],
     );
     const totalTickets = tickets.length;
     const slotsAvailable = 6 - advertisedCount;
 
-    // Filter
     const filteredTickets = useMemo(() => {
         const query = search.trim().toLowerCase();
         return tickets.filter((t) => {
@@ -309,14 +458,13 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
         });
     }, [tickets, search, transportFilter, advertiseFilter]);
 
-    // Toggle handler
     const handleToggleAdvertise = async (ticketId, currentStatus, title) => {
         const newStatus = !currentStatus;
 
         if (newStatus && advertisedCount >= 6) {
             toast.error(
                 "Maximum 6 tickets can be advertised. Please unadvertise one first.",
-                { duration: 4000 }
+                { duration: 4000 },
             );
             return;
         }
@@ -329,7 +477,7 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                 toast.success(
                     newStatus
                         ? `"${title}" is now advertised on homepage!`
-                        : `"${title}" removed from advertisement.`
+                        : `"${title}" removed from advertisement.`,
                 );
                 setTickets((prev) =>
                     prev.map((t) =>
@@ -341,8 +489,8 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                       ? new Date().toISOString()
                                       : null,
                               }
-                            : t
-                    )
+                            : t,
+                    ),
                 );
             } else {
                 toast.error(result.message || "Failed to update");
@@ -355,49 +503,130 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
     };
 
     return (
-        <div className="min-h-screen space-y-5 rounded-[28px] bg-[#F0FDF4] p-3 sm:space-y-7 sm:p-5 lg:p-6 dark:bg-[#06130D]">
-            {/* ─── Header Banner ─── */}
-            <div className="relative hidden md:block overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8">
-                <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/15 blur-3xl" />
-                <div className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-lime-300/30 blur-3xl" />
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="min-h-screen space-y-5 rounded-[28px] bg-[#F0FDF4] p-3 sm:space-y-7 sm:p-5 lg:p-6 dark:bg-[#06130D]"
+        >
+            <motion.div
+                variants={heroVariants}
+                initial="hidden"
+                animate="visible"
+                className="relative hidden md:block overflow-hidden rounded-[26px] bg-gradient-to-r from-[#052E16] via-[#16A34A] to-[#34D399] p-5 shadow-[0_24px_70px_rgba(22,163,74,0.28)] sm:rounded-[30px] sm:p-6 lg:p-8"
+            >
+                <motion.div
+                    animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.15, 0.25, 0.15],
+                    }}
+                    transition={{
+                        duration: 4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                    }}
+                    className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/15 blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        scale: [1, 1.15, 1],
+                        opacity: [0.3, 0.45, 0.3],
+                    }}
+                    transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 1,
+                    }}
+                    className="absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-lime-300/30 blur-3xl"
+                />
                 <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                    <div>
-                        
-                        <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl">
+                    <motion.div variants={itemVariants}>
+                        <motion.h1
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 25,
+                                delay: 0.1,
+                            }}
+                            className="text-2xl font-black tracking-tight text-white sm:text-3xl lg:text-4xl"
+                        >
                             Advertise Tickets
-                        </h1>
-                        <p className="mt-3 max-w-2xl text-sm leading-6 text-green-50">
+                        </motion.h1>
+                        <motion.p
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{
+                                type: "spring",
+                                stiffness: 400,
+                                damping: 25,
+                                delay: 0.2,
+                            }}
+                            className="mt-3 max-w-2xl text-sm leading-6 text-green-50"
+                        >
                             Promote approved tickets to the homepage
                             advertisement section. You can advertise up to 6
                             tickets at a time.
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-2 gap-3 rounded-2xl border border-white/20 bg-white/15 p-3 backdrop-blur-xl sm:min-w-[280px]">
-                        <div className="rounded-2xl bg-white/95 p-4 text-center shadow-lg dark:bg-[#07111F]/90">
-                            <p className="text-2xl font-black text-emerald-600">
+                        </motion.p>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 30, scale: 0.95 }}
+                        animate={{ opacity: 1, x: 0, scale: 1 }}
+                        transition={{
+                            type: "spring",
+                            stiffness: 350,
+                            damping: 25,
+                            delay: 0.3,
+                        }}
+                        className="grid grid-cols-2 gap-3 rounded-2xl border border-white/20 bg-white/15 p-3 backdrop-blur-xl sm:min-w-[280px]"
+                    >
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="rounded-2xl bg-white/95 p-4 text-center shadow-lg dark:bg-[#07111F]/90"
+                        >
+                            <motion.p
+                                key={advertisedCount}
+                                initial={{ scale: 1.3 }}
+                                animate={{ scale: 1 }}
+                                transition={{
+                                    type: "spring",
+                                    stiffness: 500,
+                                    damping: 20,
+                                }}
+                                className="text-2xl font-black text-emerald-600"
+                            >
                                 {advertisedCount}
                                 <span className="text-base font-bold text-gray-400">
                                     /6
                                 </span>
-                            </p>
+                            </motion.p>
                             <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
                                 Advertised
                             </p>
-                        </div>
-                        <div className="rounded-2xl bg-white/95 p-4 text-center shadow-lg dark:bg-[#07111F]/90">
+                        </motion.div>
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="rounded-2xl bg-white/95 p-4 text-center shadow-lg dark:bg-[#07111F]/90"
+                        >
                             <p className="text-2xl font-black text-lime-600">
                                 {totalTickets}
                             </p>
                             <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
                                 Approved
                             </p>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
 
-            {/* ─── Stat Cards ─── */}
-            <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
+            <motion.div
+                variants={containerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid gap-4 grid-cols-2 xl:grid-cols-4"
+            >
                 <StatCard
                     title="Total Approved"
                     value={totalTickets}
@@ -434,32 +663,60 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                     cardClass="from-amber-50 via-white to-orange-50 dark:from-amber-950/50 dark:via-[#07111F] dark:to-orange-950/30"
                     borderClass="border-amber-100 dark:border-amber-900/50"
                 />
-            </div>
+            </motion.div>
 
-            {/* ─── Limit Warning ─── */}
-            {advertisedCount >= 6 && (
-                <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-md dark:border-amber-900/50 dark:from-amber-950/30 dark:to-orange-950/30">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950">
-                        <FiStar className="text-xl text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-black text-amber-800 dark:text-amber-200">
-                            Maximum Advertisement Limit Reached
-                        </p>
-                        <p className="text-xs text-amber-600 dark:text-amber-400">
-                            You have advertised 6 tickets. Unadvertise one to
-                            add another.
-                        </p>
-                    </div>
-                </div>
-            )}
-
-            {/* ─── Table Section ─── */}
-            <div className="overflow-hidden rounded-[26px] border border-emerald-100 bg-white shadow-[0_25px_80px_rgba(6,78,59,0.1)] sm:rounded-[30px] dark:border-emerald-900/50 dark:bg-[#07111F]">
-                {/* Filters */}
-                <div className="border-b border-emerald-100 bg-gradient-to-r from-white via-emerald-50/60 to-green-50 p-4 sm:p-5 dark:border-emerald-900/50 dark:from-[#07111F] dark:via-[#052E16] dark:to-[#064E3B]">
-                    <div className="flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+            <AnimatePresence>
+                {advertisedCount >= 6 && (
+                    <motion.div
+                        variants={warningVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-4 shadow-md dark:border-amber-900/50 dark:from-amber-950/30 dark:to-orange-950/30"
+                    >
+                        <motion.div
+                            animate={{
+                                scale: [1, 1.15, 1],
+                                rotate: [0, 5, -5, 0],
+                            }}
+                            transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                ease: "easeInOut",
+                                repeatDelay: 3,
+                            }}
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-950"
+                        >
+                            <FiStar className="text-xl text-amber-600 dark:text-amber-400" />
+                        </motion.div>
                         <div>
+                            <p className="text-sm font-black text-amber-800 dark:text-amber-200">
+                                Maximum Advertisement Limit Reached
+                            </p>
+                            <p className="text-xs text-amber-600 dark:text-amber-400">
+                                You have advertised 6 tickets. Unadvertise one
+                                to add another.
+                            </p>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <motion.div
+                variants={tableContainerVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-50px" }}
+                className="overflow-hidden rounded-[26px] border border-emerald-100 bg-white shadow-[0_25px_80px_rgba(6,78,59,0.1)] sm:rounded-[30px] dark:border-emerald-900/50 dark:bg-[#07111F]"
+            >
+                <motion.div
+                    variants={filterBarVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="border-b border-emerald-100 bg-gradient-to-r from-white via-emerald-50/60 to-green-50 p-4 sm:p-5 dark:border-emerald-900/50 dark:from-[#07111F] dark:via-[#052E16] dark:to-[#064E3B]"
+                >
+                    <div className="flex flex-col gap-4 2xl:flex-row 2xl:items-center 2xl:justify-between">
+                        <motion.div variants={filterItemVariants}>
                             <h2 className="text-lg font-black text-[#064E3B] sm:text-xl dark:text-white">
                                 Approved Tickets Directory
                             </h2>
@@ -467,9 +724,12 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                 Toggle advertisement status for approved
                                 tickets. Max 6 at a time.
                             </p>
-                        </div>
+                        </motion.div>
                         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[1fr_160px_170px_100px] xl:items-center 2xl:w-[880px]">
-                            <div className="relative sm:col-span-2 xl:col-span-1">
+                            <motion.div
+                                variants={filterItemVariants}
+                                className="relative sm:col-span-2 xl:col-span-1"
+                            >
                                 <BiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xl text-emerald-600 dark:text-emerald-300" />
                                 <input
                                     type="text"
@@ -478,8 +738,9 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                     onChange={(e) => setSearch(e.target.value)}
                                     className="h-11 w-full rounded-2xl border border-emerald-200/90 bg-white/95 pl-10 pr-4 text-sm font-semibold text-[#052E16] caret-emerald-600 outline-none transition placeholder:text-emerald-600/55 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 dark:border-emerald-800/70 dark:bg-[#081C13] dark:text-emerald-50"
                                 />
-                            </div>
-                            <select
+                            </motion.div>
+                            <motion.select
+                                variants={filterItemVariants}
                                 value={transportFilter}
                                 onChange={(e) =>
                                     setTransportFilter(e.target.value)
@@ -491,8 +752,9 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                 <option value="train">Train</option>
                                 <option value="launch">Launch</option>
                                 <option value="plane">Plane</option>
-                            </select>
-                            <select
+                            </motion.select>
+                            <motion.select
+                                variants={filterItemVariants}
                                 value={advertiseFilter}
                                 onChange={(e) =>
                                     setAdvertiseFilter(e.target.value)
@@ -504,204 +766,297 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                 <option value="not-advertised">
                                     Not Advertised
                                 </option>
-                            </select>
-                            <button
+                            </motion.select>
+                            <motion.button
+                                variants={filterItemVariants}
+                                whileHover={{ scale: 1.03 }}
+                                whileTap={{ scale: 0.97 }}
                                 type="button"
                                 onClick={() => {
                                     setSearch("");
                                     setTransportFilter("all");
                                     setAdvertiseFilter("all");
                                 }}
-                                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-600 to-green-500 px-4 font-black text-white shadow-lg shadow-emerald-700/25 transition hover:opacity-90 sm:col-span-2 xl:col-span-1"
+                                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#064E3B] via-emerald-600 to-green-500 px-4 font-black text-white shadow-lg shadow-emerald-700/25 transition-colors hover:opacity-90 sm:col-span-2 xl:col-span-1"
                             >
-                                <FiRefreshCw /> Reset
-                            </button>
+                                <motion.div
+                                    whileHover={{ rotate: 180 }}
+                                    transition={{ duration: 0.4 }}
+                                >
+                                    <FiRefreshCw />
+                                </motion.div>
+                                Reset
+                            </motion.button>
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* ─── Mobile Cards ─── */}
                 <div className="block bg-gradient-to-br from-[#ECFDF5] via-[#F8FFF9] to-[#F7FEE7] p-4 lg:hidden dark:from-[#04130B] dark:via-[#071A12] dark:to-[#102A0D]">
-                    {filteredTickets.length === 0 ? (
-                        <div className="flex items-center gap-3 rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5 dark:border-emerald-900/50 dark:bg-emerald-950/20">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-emerald-600 dark:bg-[#06130D]">
-                                <BiSearch className="text-2xl" />
-                            </div>
-                            <div>
-                                <p className="font-bold text-[#064E3B] dark:text-white">
-                                    No tickets found
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    Try changing search or filter options.
-                                </p>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                            {filteredTickets.map((ticket, index) => {
-                                const tid = getTicketId(ticket);
-                                const rowKey = getTicketKey(ticket, index);
-                                const title = getTitle(ticket);
-                                const isAd = parseBoolean(
-                                    ticket?.isAdvertised
-                                );
-                                const transport = getTransport(ticket);
-                                const TransportIconComp =
-                                    getTransportIcon(transport);
-                                const perks = getPerks(ticket);
+                    <AnimatePresence mode="wait">
+                        {filteredTickets.length === 0 ? (
+                            <motion.div
+                                key="empty"
+                                variants={emptyStateVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="hidden"
+                                className="flex items-center gap-3 rounded-3xl border border-emerald-100 bg-emerald-50/60 p-5 dark:border-emerald-900/50 dark:bg-emerald-950/20"
+                            >
+                                <motion.div
+                                    animate={{ y: [0, -3, 0] }}
+                                    transition={{
+                                        duration: 2,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                    }}
+                                    className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-emerald-600 dark:bg-[#06130D]"
+                                >
+                                    <BiSearch className="text-2xl" />
+                                </motion.div>
+                                <div>
+                                    <p className="font-bold text-[#064E3B] dark:text-white">
+                                        No tickets found
+                                    </p>
+                                    <p className="text-sm text-gray-500">
+                                        Try changing search or filter options.
+                                    </p>
+                                </div>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="cards"
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="grid grid-cols-1 gap-4 md:grid-cols-2"
+                            >
+                                {filteredTickets.map((ticket, index) => {
+                                    const tid = getTicketId(ticket);
+                                    const rowKey = getTicketKey(ticket, index);
+                                    const title = getTitle(ticket);
+                                    const isAd = parseBoolean(
+                                        ticket?.isAdvertised,
+                                    );
+                                    const transport = getTransport(ticket);
+                                    const TransportIconComp =
+                                        getTransportIcon(transport);
+                                    const perks = getPerks(ticket);
 
-                                return (
-                                    <div
-                                        key={`m-${rowKey}`}
-                                        className={`relative overflow-hidden rounded-[28px] border p-4 shadow-[0_18px_55px_rgba(6,78,59,0.13)] transition-all ${
-                                            isAd
-                                                ? "border-emerald-300 bg-gradient-to-br from-emerald-50 via-[#F0FDF4] to-[#ECFCCB] dark:border-emerald-700 dark:from-[#06130D] dark:via-[#082016] dark:to-[#142C10]"
-                                                : "border-emerald-200/80 bg-gradient-to-br from-white via-[#F0FDF4] to-[#ECFCCB] dark:border-emerald-800/70 dark:from-[#06130D] dark:via-[#082016] dark:to-[#142C10]"
-                                        }`}
-                                    >
-                                        <div className="absolute -right-14 -top-14 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl" />
+                                    return (
+                                        <motion.div
+                                            key={`m-${rowKey}`}
+                                            variants={mobileCardVariants}
+                                            whileHover={{ y: -3, scale: 1.01 }}
+                                            transition={{
+                                                type: "spring",
+                                                stiffness: 400,
+                                                damping: 20,
+                                            }}
+                                            layout
+                                            className={`relative overflow-hidden rounded-[28px] border p-4 shadow-[0_18px_55px_rgba(6,78,59,0.13)] ${
+                                                isAd
+                                                    ? "border-emerald-300 bg-gradient-to-br from-emerald-50 via-[#F0FDF4] to-[#ECFCCB] dark:border-emerald-700 dark:from-[#06130D] dark:via-[#082016] dark:to-[#142C10]"
+                                                    : "border-emerald-200/80 bg-gradient-to-br from-white via-[#F0FDF4] to-[#ECFCCB] dark:border-emerald-800/70 dark:from-[#06130D] dark:via-[#082016] dark:to-[#142C10]"
+                                            }`}
+                                        >
+                                            <div className="absolute -right-14 -top-14 h-32 w-32 rounded-full bg-emerald-400/20 blur-2xl" />
 
-                                        {/* Top */}
-                                        <div className="relative z-10 flex items-start justify-between gap-3">
-                                            <div className="flex min-w-0 items-center gap-3">
-                                                <TicketImage
-                                                    src={getImage(ticket)}
-                                                    title={title}
-                                                    className="border-2 border-white shadow-md ring-2 ring-emerald-100 dark:border-[#07111F] dark:ring-emerald-900/50"
-                                                />
-                                                <div className="min-w-0">
-                                                    <p className="truncate font-black text-[#064E3B] dark:text-white">
-                                                        {title}
+                                            <div className="relative z-10 flex items-start justify-between gap-3">
+                                                <div className="flex min-w-0 items-center gap-3">
+                                                    <TicketImage
+                                                        src={getImage(ticket)}
+                                                        title={title}
+                                                        className="border-2 border-white shadow-md ring-2 ring-emerald-100 dark:border-[#07111F] dark:ring-emerald-900/50"
+                                                    />
+                                                    <div className="min-w-0">
+                                                        <p className="truncate font-black text-[#064E3B] dark:text-white">
+                                                            {title}
+                                                        </p>
+                                                        <div className="mt-1 flex items-center gap-1.5">
+                                                            <span
+                                                                className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-black ${getTransportColor(transport)}`}
+                                                            >
+                                                                <TransportIconComp className="text-sm" />
+                                                                {transport}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <motion.span
+                                                    key={isAd ? "ad" : "notad"}
+                                                    initial={{
+                                                        scale: 0.8,
+                                                        opacity: 0,
+                                                    }}
+                                                    animate={{
+                                                        scale: 1,
+                                                        opacity: 1,
+                                                    }}
+                                                    transition={{
+                                                        type: "spring",
+                                                        stiffness: 500,
+                                                        damping: 25,
+                                                    }}
+                                                    className={`shrink-0 rounded-lg px-2 py-1 text-xs font-black ${
+                                                        isAd
+                                                            ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                                                            : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
+                                                    }`}
+                                                >
+                                                    {isAd
+                                                        ? "Advertised"
+                                                        : "Not Ad"}
+                                                </motion.span>
+                                            </div>
+
+                                            <div className="relative z-10 mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-emerald-100/80 bg-white/85 p-4 text-sm shadow-inner backdrop-blur dark:border-emerald-900/60 dark:bg-[#04130B]/75">
+                                                <div>
+                                                    <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
+                                                        Route
                                                     </p>
-                                                    <div className="mt-1 flex items-center gap-1.5">
-                                                        <span
-                                                            className={`inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-black ${getTransportColor(transport)}`}
-                                                        >
-                                                            <TransportIconComp className="text-sm" />
-                                                            {transport}
+                                                    <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                                        <FiMapPin className="shrink-0 text-emerald-600" />
+                                                        <span className="truncate">
+                                                            {getFrom(ticket)}
+                                                        </span>
+                                                        <span className="text-emerald-500">
+                                                            →
+                                                        </span>
+                                                        <span className="truncate">
+                                                            {getTo(ticket)}
                                                         </span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            {isAd ? (
-                                                <span className="shrink-0 rounded-lg bg-emerald-100 px-2 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                                                    Advertised
-                                                </span>
-                                            ) : (
-                                                <span className="shrink-0 rounded-lg bg-gray-100 px-2 py-1 text-xs font-black text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                                                    Not Ad
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        {/* Info */}
-                                        <div className="relative z-10 mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-emerald-100/80 bg-white/85 p-4 text-sm shadow-inner backdrop-blur dark:border-emerald-900/60 dark:bg-[#04130B]/75">
-                                            <div>
-                                                <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
-                                                    Route
-                                                </p>
-                                                <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
-                                                    <FiMapPin className="shrink-0 text-emerald-600" />
-                                                    <span className="truncate">
-                                                        {getFrom(ticket)}
-                                                    </span>
-                                                    <span className="text-emerald-500">
-                                                        →
-                                                    </span>
-                                                    <span className="truncate">
-                                                        {getTo(ticket)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
-                                                    Price
-                                                </p>
-                                                <div className="flex items-center gap-1 font-black text-emerald-700 dark:text-emerald-300">
-                                                    <FiDollarSign className="text-emerald-600" />
-                                                    ৳{getPrice(ticket)}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
-                                                    Quantity
-                                                </p>
-                                                <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
-                                                    <FiPackage className="text-lime-600" />
-                                                    {getQuantity(ticket)}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
-                                                    Departure
-                                                </p>
-                                                <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
-                                                    <FiCalendar className="text-lime-600" />
-                                                    <span className="text-xs">
-                                                        {formatDate(
-                                                            getDeparture(
-                                                                ticket
-                                                            )
-                                                        )}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            {perks.length > 0 && (
-                                                <div className="col-span-2">
+                                                <div>
                                                     <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
-                                                        Perks
+                                                        Price
                                                     </p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {perks.map((p, i) => (
-                                                            <span
-                                                                key={i}
-                                                                className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                                                            >
-                                                                {p}
-                                                            </span>
-                                                        ))}
+                                                    <div className="flex items-center gap-1 font-black text-emerald-700 dark:text-emerald-300">
+                                                        <FiDollarSign className="text-emerald-600" />
+                                                        ৳{getPrice(ticket)}
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
-
-                                        {/* Toggle */}
-                                        <div className="relative z-10 mt-4 flex items-center justify-between border-t border-emerald-100 pt-4 dark:border-emerald-900/50">
-                                            <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                                                {isAd
-                                                    ? "Currently advertised"
-                                                    : "Not advertised"}
-                                            </span>
-                                            <div className="flex items-center gap-3">
-                                                <AdvertiseToggle
-                                                    isOn={isAd}
-                                                    loading={busy === tid}
-                                                    disabled={
-                                                        !isAd &&
-                                                        advertisedCount >= 6
-                                                    }
-                                                    onToggle={() =>
-                                                        handleToggleAdvertise(
-                                                            tid,
-                                                            isAd,
-                                                            title
-                                                        )
-                                                    }
-                                                />
-                                                <span className="text-xs font-bold text-gray-400">
-                                                    {isAd ? "ON" : "OFF"}
-                                                </span>
+                                                <div>
+                                                    <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
+                                                        Quantity
+                                                    </p>
+                                                    <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                                        <FiPackage className="text-lime-600" />
+                                                        {getQuantity(ticket)}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
+                                                        Departure
+                                                    </p>
+                                                    <div className="flex items-center gap-1 font-semibold text-gray-600 dark:text-gray-300">
+                                                        <FiCalendar className="text-lime-600" />
+                                                        <span className="text-xs">
+                                                            {formatDate(
+                                                                getDeparture(
+                                                                    ticket,
+                                                                ),
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                {perks.length > 0 && (
+                                                    <div className="col-span-2">
+                                                        <p className="mb-1 text-xs font-black uppercase text-emerald-700 dark:text-emerald-300">
+                                                            Perks
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {perks.map(
+                                                                (p, i) => (
+                                                                    <motion.span
+                                                                        key={i}
+                                                                        initial={{
+                                                                            opacity: 0,
+                                                                            scale: 0.8,
+                                                                        }}
+                                                                        animate={{
+                                                                            opacity: 1,
+                                                                            scale: 1,
+                                                                        }}
+                                                                        transition={{
+                                                                            delay:
+                                                                                i *
+                                                                                0.03,
+                                                                        }}
+                                                                        className="rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                                                                    >
+                                                                        {p}
+                                                                    </motion.span>
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
+
+                                            <div className="relative z-10 mt-4 flex items-center justify-between border-t border-emerald-100 pt-4 dark:border-emerald-900/50">
+                                                <motion.span
+                                                    key={
+                                                        isAd
+                                                            ? "on-text"
+                                                            : "off-text"
+                                                    }
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    className="text-sm font-bold text-gray-500 dark:text-gray-400"
+                                                >
+                                                    {isAd
+                                                        ? "Currently advertised"
+                                                        : "Not advertised"}
+                                                </motion.span>
+                                                <div className="flex items-center gap-3">
+                                                    <AdvertiseToggle
+                                                        isOn={isAd}
+                                                        loading={busy === tid}
+                                                        disabled={
+                                                            !isAd &&
+                                                            advertisedCount >= 6
+                                                        }
+                                                        onToggle={() =>
+                                                            handleToggleAdvertise(
+                                                                tid,
+                                                                isAd,
+                                                                title,
+                                                            )
+                                                        }
+                                                    />
+                                                    <motion.span
+                                                        key={
+                                                            isAd ? "ON" : "OFF"
+                                                        }
+                                                        initial={{
+                                                            opacity: 0,
+                                                            scale: 0.8,
+                                                        }}
+                                                        animate={{
+                                                            opacity: 1,
+                                                            scale: 1,
+                                                        }}
+                                                        className="text-xs font-bold text-gray-400"
+                                                    >
+                                                        {isAd ? "ON" : "OFF"}
+                                                    </motion.span>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    );
+                                })}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
 
-                {/* ─── Desktop Table ─── */}
-                <div className="hidden lg:block">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="hidden lg:block"
+                >
                     <Table>
                         <Table.ScrollContainer>
                             <Table.Content
@@ -725,10 +1080,27 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                     {filteredTickets.length === 0 ? (
                                         <Table.Row>
                                             <Table.Cell>
-                                                <div className="flex items-center gap-3 py-8">
-                                                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/50">
+                                                <motion.div
+                                                    variants={
+                                                        emptyStateVariants
+                                                    }
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    className="flex items-center gap-3 py-8"
+                                                >
+                                                    <motion.div
+                                                        animate={{
+                                                            y: [0, -3, 0],
+                                                        }}
+                                                        transition={{
+                                                            duration: 2,
+                                                            repeat: Infinity,
+                                                            ease: "easeInOut",
+                                                        }}
+                                                        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/50"
+                                                    >
                                                         <BiSearch className="text-2xl text-emerald-600" />
-                                                    </div>
+                                                    </motion.div>
                                                     <div>
                                                         <p className="font-bold text-[#064E3B] dark:text-white">
                                                             No tickets found
@@ -738,7 +1110,7 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                                             or filter options.
                                                         </p>
                                                     </div>
-                                                </div>
+                                                </motion.div>
                                             </Table.Cell>
                                             <Table.Cell>{""}</Table.Cell>
                                             <Table.Cell>{""}</Table.Cell>
@@ -750,169 +1122,156 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                             <Table.Cell>{""}</Table.Cell>
                                         </Table.Row>
                                     ) : (
-                                        filteredTickets.map(
-                                            (ticket, index) => {
-                                                const tid =
-                                                    getTicketId(ticket);
-                                                const rowKey = getTicketKey(
-                                                    ticket,
-                                                    index
-                                                );
-                                                const title =
-                                                    getTitle(ticket);
-                                                const isAd = parseBoolean(
-                                                    ticket?.isAdvertised
-                                                );
-                                                const transport =
-                                                    getTransport(ticket);
-                                                const TransportIconComp =
-                                                    getTransportIcon(
-                                                        transport
-                                                    );
-                                                const perks =
-                                                    getPerks(ticket);
+                                        filteredTickets.map((ticket, index) => {
+                                            const tid = getTicketId(ticket);
+                                            const rowKey = getTicketKey(
+                                                ticket,
+                                                index,
+                                            );
+                                            const title = getTitle(ticket);
+                                            const isAd = parseBoolean(
+                                                ticket?.isAdvertised,
+                                            );
+                                            const transport =
+                                                getTransport(ticket);
+                                            const TransportIconComp =
+                                                getTransportIcon(transport);
+                                            const perks = getPerks(ticket);
 
-                                                return (
-                                                    <Table.Row
-                                                        key={`d-${rowKey}`}
-                                                    >
-                                                        {/* Ticket */}
-                                                        <Table.Cell>
-                                                            <div className="flex items-center gap-3 py-2">
-                                                                <TicketImage
-                                                                    src={getImage(
-                                                                        ticket
-                                                                    )}
-                                                                    title={
-                                                                        title
-                                                                    }
-                                                                    className="border-2 border-white shadow-md ring-2 ring-emerald-100 dark:border-[#07111F] dark:ring-emerald-900/50"
-                                                                />
-                                                                <div>
-                                                                    <p className="max-w-[180px] truncate font-black text-[#064E3B] dark:text-white">
-                                                                        {title}
-                                                                    </p>
-                                                                    <p className="text-xs font-semibold text-gray-400">
-                                                                        ID:{" "}
-                                                                        {tid
-                                                                            ? String(
-                                                                                  tid
-                                                                              ).slice(
-                                                                                  0,
-                                                                                  8
-                                                                              )
-                                                                            : "N/A"}
-                                                                    </p>
-                                                                </div>
+                                            return (
+                                                <Table.Row key={`d-${rowKey}`}>
+                                                    <Table.Cell>
+                                                        <div className="flex items-center gap-3 py-2">
+                                                            <TicketImage
+                                                                src={getImage(
+                                                                    ticket,
+                                                                )}
+                                                                title={title}
+                                                                className="border-2 border-white shadow-md ring-2 ring-emerald-100 dark:border-[#07111F] dark:ring-emerald-900/50"
+                                                            />
+                                                            <div>
+                                                                <p className="max-w-[180px] truncate font-black text-[#064E3B] dark:text-white">
+                                                                    {title}
+                                                                </p>
+                                                                <p className="text-xs font-semibold text-gray-400">
+                                                                    ID:{" "}
+                                                                    {tid
+                                                                        ? String(
+                                                                              tid,
+                                                                          ).slice(
+                                                                              0,
+                                                                              8,
+                                                                          )
+                                                                        : "N/A"}
+                                                                </p>
                                                             </div>
-                                                        </Table.Cell>
-
-                                                        {/* Route */}
-                                                        <Table.Cell>
-                                                            <div className="flex items-center gap-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                                                <FiMapPin className="shrink-0 text-emerald-600" />
-                                                                <span className="max-w-[80px] truncate">
-                                                                    {getFrom(
-                                                                        ticket
-                                                                    )}
-                                                                </span>
-                                                                <span className="font-black text-emerald-500">
-                                                                    →
-                                                                </span>
-                                                                <span className="max-w-[80px] truncate">
-                                                                    {getTo(
-                                                                        ticket
-                                                                    )}
-                                                                </span>
-                                                            </div>
-                                                        </Table.Cell>
-
-                                                        {/* Transport */}
-                                                        <Table.Cell>
-                                                            <span
-                                                                className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black capitalize ${getTransportColor(transport)}`}
-                                                            >
-                                                                <TransportIconComp className="text-sm" />
-                                                                {transport}
-                                                            </span>
-                                                        </Table.Cell>
-
-                                                        {/* Price */}
-                                                        <Table.Cell>
-                                                            <span className="text-sm font-black text-emerald-700 dark:text-emerald-300">
-                                                                ৳
-                                                                {getPrice(
-                                                                    ticket
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex items-center gap-1 text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                                            <FiMapPin className="shrink-0 text-emerald-600" />
+                                                            <span className="max-w-[80px] truncate">
+                                                                {getFrom(
+                                                                    ticket,
                                                                 )}
                                                             </span>
-                                                        </Table.Cell>
-
-                                                        {/* Qty */}
-                                                        <Table.Cell>
-                                                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
-                                                                {getQuantity(
-                                                                    ticket
-                                                                )}
+                                                            <span className="font-black text-emerald-500">
+                                                                →
                                                             </span>
-                                                        </Table.Cell>
-
-                                                        {/* Departure */}
-                                                        <Table.Cell>
-                                                            <div className="flex items-center gap-1 text-sm font-semibold text-gray-500 dark:text-gray-400">
-                                                                <FiCalendar className="text-lime-600" />
-                                                                {formatDateTime(
-                                                                    getDeparture(
-                                                                        ticket
+                                                            <span className="max-w-[80px] truncate">
+                                                                {getTo(ticket)}
+                                                            </span>
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <span
+                                                            className={`inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-black capitalize ${getTransportColor(transport)}`}
+                                                        >
+                                                            <TransportIconComp className="text-sm" />
+                                                            {transport}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <span className="text-sm font-black text-emerald-700 dark:text-emerald-300">
+                                                            ৳{getPrice(ticket)}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                                                            {getQuantity(
+                                                                ticket,
+                                                            )}
+                                                        </span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex items-center gap-1 text-sm font-semibold text-gray-500 dark:text-gray-400">
+                                                            <FiCalendar className="text-lime-600" />
+                                                            {formatDateTime(
+                                                                getDeparture(
+                                                                    ticket,
+                                                                ),
+                                                            )}
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex max-w-[150px] flex-wrap gap-1">
+                                                            {perks.length >
+                                                            0 ? (
+                                                                perks
+                                                                    .slice(0, 3)
+                                                                    .map(
+                                                                        (
+                                                                            p,
+                                                                            i,
+                                                                        ) => (
+                                                                            <span
+                                                                                key={
+                                                                                    i
+                                                                                }
+                                                                                className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+                                                                            >
+                                                                                {
+                                                                                    p
+                                                                                }
+                                                                            </span>
+                                                                        ),
                                                                     )
-                                                                )}
-                                                            </div>
-                                                        </Table.Cell>
-
-                                                        {/* Perks */}
-                                                        <Table.Cell>
-                                                            <div className="flex max-w-[150px] flex-wrap gap-1">
-                                                                {perks.length >
-                                                                0 ? (
-                                                                    perks
-                                                                        .slice(
-                                                                            0,
-                                                                            3
-                                                                        )
-                                                                        .map(
-                                                                            (
-                                                                                p,
-                                                                                i
-                                                                            ) => (
-                                                                                <span
-                                                                                    key={
-                                                                                        i
-                                                                                    }
-                                                                                    className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                                                                                >
-                                                                                    {
-                                                                                        p
-                                                                                    }
-                                                                                </span>
-                                                                            )
-                                                                        )
-                                                                ) : (
-                                                                    <span className="text-xs text-gray-400">
-                                                                        None
-                                                                    </span>
-                                                                )}
-                                                                {perks.length >
-                                                                    3 && (
-                                                                    <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                                                                        +
-                                                                        {perks.length -
-                                                                            3}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </Table.Cell>
-
-                                                        {/* Status */}
-                                                        <Table.Cell>
+                                                            ) : (
+                                                                <span className="text-xs text-gray-400">
+                                                                    None
+                                                                </span>
+                                                            )}
+                                                            {perks.length >
+                                                                3 && (
+                                                                <span className="rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-bold text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                                                                    +
+                                                                    {perks.length -
+                                                                        3}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <motion.span
+                                                            key={
+                                                                isAd
+                                                                    ? "ad"
+                                                                    : "notad"
+                                                            }
+                                                            initial={{
+                                                                scale: 0.85,
+                                                                opacity: 0,
+                                                            }}
+                                                            animate={{
+                                                                scale: 1,
+                                                                opacity: 1,
+                                                            }}
+                                                            transition={{
+                                                                type: "spring",
+                                                                stiffness: 500,
+                                                                damping: 25,
+                                                            }}
+                                                        >
                                                             {isAd ? (
                                                                 <span className="inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-black text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
                                                                     <FiCheckCircle className="text-xs" />
@@ -923,49 +1282,61 @@ const AdvertiseTicketsTable = ({ tickets: initialTickets }) => {
                                                                     Not Ad
                                                                 </span>
                                                             )}
-                                                        </Table.Cell>
-
-                                                        {/* Toggle */}
-                                                        <Table.Cell>
-                                                            <div className="flex items-center gap-3">
-                                                                <AdvertiseToggle
-                                                                    isOn={isAd}
-                                                                    loading={
-                                                                        busy ===
-                                                                        tid
-                                                                    }
-                                                                    disabled={
-                                                                        !isAd &&
-                                                                        advertisedCount >=
-                                                                            6
-                                                                    }
-                                                                    onToggle={() =>
-                                                                        handleToggleAdvertise(
-                                                                            tid,
-                                                                            isAd,
-                                                                            title
-                                                                        )
-                                                                    }
-                                                                />
-                                                                <span className="text-xs font-bold text-gray-400">
-                                                                    {isAd
+                                                        </motion.span>
+                                                    </Table.Cell>
+                                                    <Table.Cell>
+                                                        <div className="flex items-center gap-3">
+                                                            <AdvertiseToggle
+                                                                isOn={isAd}
+                                                                loading={
+                                                                    busy === tid
+                                                                }
+                                                                disabled={
+                                                                    !isAd &&
+                                                                    advertisedCount >=
+                                                                        6
+                                                                }
+                                                                onToggle={() =>
+                                                                    handleToggleAdvertise(
+                                                                        tid,
+                                                                        isAd,
+                                                                        title,
+                                                                    )
+                                                                }
+                                                            />
+                                                            <motion.span
+                                                                key={
+                                                                    isAd
                                                                         ? "ON"
-                                                                        : "OFF"}
-                                                                </span>
-                                                            </div>
-                                                        </Table.Cell>
-                                                    </Table.Row>
-                                                );
-                                            }
-                                        )
+                                                                        : "OFF"
+                                                                }
+                                                                initial={{
+                                                                    opacity: 0,
+                                                                    scale: 0.8,
+                                                                }}
+                                                                animate={{
+                                                                    opacity: 1,
+                                                                    scale: 1,
+                                                                }}
+                                                                className="text-xs font-bold text-gray-400"
+                                                            >
+                                                                {isAd
+                                                                    ? "ON"
+                                                                    : "OFF"}
+                                                            </motion.span>
+                                                        </div>
+                                                    </Table.Cell>
+                                                </Table.Row>
+                                            );
+                                        })
                                     )}
                                 </Table.Body>
                             </Table.Content>
                         </Table.ScrollContainer>
                     </Table>
-                </div>
-            </div>
-        </div>
+                </motion.div>
+            </motion.div>
+        </motion.div>
     );
 };
 

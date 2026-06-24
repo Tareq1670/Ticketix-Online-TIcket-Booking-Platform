@@ -8,8 +8,8 @@ import { FaPlus } from "react-icons/fa6";
 import { HiMiniSquares2X2 } from "react-icons/hi2";
 import { MdBlock } from "react-icons/md";
 import { motion, AnimatePresence } from "framer-motion";
-import MyAddedTicketCard from "./TicketsCard";
 import { deleteMyAddedTicket } from "@/lib/actions/ticket";
+import MyAddedTicketCard from "./MyAddedTicketCard";
 
 const MyTicketsCard = ({ initialTickets, vendorId, isFraud = false }) => {
     const [tickets, setTickets] = useState(
