@@ -53,3 +53,12 @@ export const clientDataFetch = async (path) => {
 
     return res.json();
 };
+
+
+export const publicClientDataFetch = async (path) => {
+    const res = await fetch(`${baseUrl}${path}`, {
+        cache: "no-cache",
+    });
+
+    return res.json();
+};

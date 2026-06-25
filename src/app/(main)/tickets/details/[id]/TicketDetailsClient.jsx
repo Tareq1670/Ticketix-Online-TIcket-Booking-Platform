@@ -255,7 +255,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     onClick={() => router.back()}
-                    className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-600 hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400 transition-colors group"
+                    className="mb-4 flex items-center gap-2 text-sm font-semibold text-zinc-600 hover:text-emerald-600 dark:text-zinc-400 dark:hover:text-emerald-400 transition-colors group cursor-pointer"
                 >
                     <FaArrowLeft size={13} className="transition-transform group-hover:-translate-x-1" />
                     Back to Tickets
@@ -522,7 +522,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                                                 boxShadow: "0 12px 30px rgba(5, 150, 105, 0.35)",
                                             }}
                                             whileTap={{ scale: 0.98 }}
-                                            className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-green-500 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-500/25 transition-all"
+                                            className="w-full rounded-xl bg-gradient-to-r from-emerald-600 to-green-500 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-500/25 transition-all cursor-pointer"
                                         >
                                             <span className="flex items-center justify-center gap-2">
                                                 <IoTicketSharp size={20} />
@@ -625,7 +625,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                                             type="button"
                                             onClick={() => setQty(Math.max(1, qty - 1))}
                                             disabled={qty <= 1}
-                                            className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-zinc-200 bg-white text-xl font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 transition-colors dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                                            className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-zinc-200 bg-white text-xl font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 transition-colors dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
                                         >
                                             −
                                         </motion.button>
@@ -649,7 +649,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                                             type="button"
                                             onClick={() => setQty(Math.min(available, qty + 1))}
                                             disabled={qty >= available}
-                                            className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-zinc-200 bg-white text-xl font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 transition-colors dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                                            className="flex h-12 w-12 items-center justify-center rounded-lg border-2 border-zinc-200 bg-white text-xl font-bold text-zinc-700 hover:bg-zinc-50 disabled:opacity-40 transition-colors dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 cursor-pointer"
                                         >
                                             +
                                         </motion.button>
@@ -680,7 +680,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setIsOpen(false)}
-                                    className="px-5 py-3 rounded-xl text-sm font-bold text-zinc-700 hover:bg-zinc-100 border border-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:border-zinc-700 transition-all"
+                                    className="px-5 py-3 rounded-xl text-sm font-bold text-zinc-700 hover:bg-zinc-100 border border-zinc-200 dark:text-zinc-200 dark:hover:bg-zinc-800 dark:border-zinc-700 transition-all cursor-pointer"
                                 >
                                     Cancel
                                 </motion.button>
@@ -689,7 +689,7 @@ const TicketDetailsClient = ({ ticket, user }) => {
                                     whileTap={{ scale: 0.98 }}
                                     onClick={handleBook}
                                     disabled={loading || qty < 1 || qty > available}
-                                    className="px-5 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+                                    className="px-5 py-3 rounded-xl text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-500 shadow-lg shadow-emerald-500/25 disabled:opacity-60 disabled:cursor-not-allowed transition-all cursor-pointer"
                                 >
                                     {loading ? (
                                         <span className="flex items-center gap-2">
