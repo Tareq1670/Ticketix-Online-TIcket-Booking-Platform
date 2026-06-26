@@ -6,9 +6,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 
 const baseUrl =
-    process.env.API_URL ||
-    process.env.NEXT_PUBLIC_API_URL ||
-    "http://localhost:5000";
+    process.env.NEXT_PUBLIC_URL;
 
 const parseBackendResponse = async (res) => {
     const contentType = res.headers.get("content-type") || "";
