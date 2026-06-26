@@ -11,7 +11,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
-import { useState, useRef, useCallback, useMemo } from "react";
+import { useState, useRef, useCallback, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { IoTicketOutline } from "react-icons/io5";
@@ -59,7 +59,7 @@ const STEPS = [
     { id: 3, title: "Security", icon: "🔐" },
 ];
 
-const RegisterPage = () => {
+const RegisterContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
@@ -1095,6 +1095,18 @@ const RegisterPage = () => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const RegisterPage = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+                <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        }>
+            <RegisterContent />
+        </Suspense>
     );
 };
 

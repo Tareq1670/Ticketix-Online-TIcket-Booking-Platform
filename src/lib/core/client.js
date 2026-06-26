@@ -19,7 +19,6 @@ export const serverMutation = async (path, data, method = "POST") => {
 
 export const serverDelete = async (path) => {
     const { data: tokenData } = await authClient.token();
-    console.log(tokenData.token);
 
     const res = await fetch(`${baseUrl}${path}`, {
         method: "DELETE",
@@ -34,7 +33,6 @@ export const serverDelete = async (path) => {
 
 export const clientDataFetch = async (path) => {
     const { data: token } = await authClient.token();
-    console.log(token);
 
     const res = await fetch(`${baseUrl}${path}`, {
         headers: {

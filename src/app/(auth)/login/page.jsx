@@ -11,7 +11,7 @@ import {
 } from "@heroui/react";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 import { IoTicketOutline } from "react-icons/io5";
@@ -39,7 +39,7 @@ const validateStrongPassword = (value) => {
     return null;
 };
 
-const LoginPage = () => {
+const LoginContent = () => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirect = searchParams.get("redirect") || "/";
@@ -64,7 +64,6 @@ const LoginPage = () => {
                 password,
                 rememberMe,
             });
-
 
             if (error) {
                 if (error.message?.includes("Invalid")) {
@@ -114,7 +113,6 @@ const LoginPage = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 transition-colors duration-500">
-            {/* Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute -top-20 -left-20 w-72 h-72 bg-green-200/30 dark:bg-green-900/10 rounded-full blur-3xl" />
                 <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-green-200/25 dark:bg-green-900/10 rounded-full blur-3xl" />
@@ -134,12 +132,10 @@ const LoginPage = () => {
                 </div>
             </div>
 
-            {/* Card */}
             <div className="relative w-full max-w-md">
                 <div className="absolute -inset-1 bg-gradient-to-r from-green-400/20 via-green-400/20 to-green-400/20 dark:from-green-600/10 dark:via-green-600/10 dark:to-green-600/10 rounded-2xl blur-xl" />
 
                 <div className="relative bg-white/85 dark:bg-zinc-900/85 backdrop-blur-xl border border-green-100 dark:border-zinc-800 rounded-2xl shadow-2xl shadow-green-900/5 dark:shadow-black/20 p-8 md:p-10">
-                    {/* Header */}
                     <div className="text-center mb-8">
                         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg shadow-green-500/25 mb-4">
                             <IoTicketOutline className="text-white" size={32} />
@@ -157,7 +153,6 @@ const LoginPage = () => {
                         </p>
                     </div>
 
-                    {/* Error */}
                     {error && (
                         <div className="mb-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-xl text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
                             <svg
@@ -175,12 +170,10 @@ const LoginPage = () => {
                         </div>
                     )}
 
-                    {/* Form */}
                     <Form
                         onSubmit={handleLogin}
                         className="flex flex-col gap-5"
                     >
-                        {/* Email */}
                         <TextField
                             isRequired
                             name="email"
@@ -216,7 +209,6 @@ const LoginPage = () => {
                             <FieldError className="text-xs text-red-500 mt-1.5" />
                         </TextField>
 
-                        {/* Password */}
                         <TextField
                             isRequired
                             minLength={8}
@@ -308,7 +300,6 @@ const LoginPage = () => {
                             <FieldError className="text-xs text-red-500 mt-1.5" />
                         </TextField>
 
-                        {/* Remember me */}
                         <div className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -324,7 +315,6 @@ const LoginPage = () => {
                             </label>
                         </div>
 
-                        {/* Submit */}
                         <Button
                             type="submit"
                             isDisabled={isLoading}
@@ -363,7 +353,6 @@ const LoginPage = () => {
                         </Button>
                     </Form>
 
-                    {/* Divider */}
                     <div className="relative flex py-5 items-center justify-center">
                         <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
                         <span className="flex-shrink mx-4 text-zinc-400 dark:text-zinc-500 text-xs font-medium uppercase tracking-widest">
@@ -372,7 +361,6 @@ const LoginPage = () => {
                         <div className="flex-grow border-t border-zinc-200 dark:border-zinc-800" />
                     </div>
 
-                    {/* Google */}
                     <Button
                         type="button"
                         onClick={handleGoogleLogin}
@@ -383,7 +371,6 @@ const LoginPage = () => {
                         Continue with Google
                     </Button>
 
-                    {/* Register */}
                     <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-7">
                         Don&apos;t have an account?{" "}
                         <Link
@@ -396,6 +383,18 @@ const LoginPage = () => {
                 </div>
             </div>
         </div>
+    );
+};
+
+const LoginPage = () => {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+                <div className="w-10 h-10 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+        }>
+            <LoginContent />
+        </Suspense>
     );
 };
 

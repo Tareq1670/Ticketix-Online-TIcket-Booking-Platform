@@ -30,7 +30,6 @@ export async function GET(req) {
         const { token } = await auth.api.getToken({
             headers: await headers(),
         })
-        console.log("revenue :" , token);
 
         if (!token) {
             return NextResponse.json(
