@@ -11,11 +11,6 @@ export const metadata = {
         "Train Ticket Login",
         "Bangladesh Ticket Booking"
     ],
-    openGraph: {
-        title: "Login to Ticketix",
-        description: "Securely sign in to your Ticketix portal and book your tickets instantly.",
-        type: "website",
-    },
 };
 
 const LoginLayout = ({ children }) => {
